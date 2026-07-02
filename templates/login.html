@@ -1,9 +1,10 @@
-
+{% extends "base.html" %}
+{% block content %}
 
 <div>
     <h2>Login</h2>
 
-    <form action="POST">
+    <form method="POST">
     <input type="text" name="username" placeholder="Email/username" required> <br><br>
     <input type="password" name="password" placeholder="password" required> <br><br>
     <label for="role">Choose a Role</label>
@@ -12,10 +13,15 @@
         <option value="staff">Staff</option>
         <option value="admin">Admin</option>
     </select>
+    <br><br>
+    <button type="submit">Login</button>
     </form>
+    {% if msg %}
+    <p>{{ msg }}</p>
+    {% endif %}
 
     <p>
         <a href="/register" style="text-decoration: none;">Haven't account? Click here</a>
     </p>
 </div>
-
+{% endblock %}

@@ -1,17 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
     <title>Document</title>
     <link rel="stylesheet" href="{{url_for("static", filename='css/style.css')}}">
 </head>
 <body>
-    <nav>
-        <a href="/register">Register</a>
-        <a href="/login">Login</a>
-        <a href="/contact">Contact</a>
-        <a href="/about">About Us</a>
+    <nav style="background: #1D2228; padding: 15px;">
+        <a href="/" style="color: azure; margin-right: 15px;">Home</a>
+        <a href="/contact" style="color: azure; margin-right: 15px;">Contact us</a>
+
+        <a href="/my_bookings" style="color: azure; margin-right: 15px;">History</a>
+
+        <a href="/home" style="color: azure; margin-right: 15px;">Home page</a>
+
+        <a href="/about" style="color: azure; margin-right: 15px;">About us</a>
+
+        <a href="/trek" style="color: azure; margin-right: 15px;">Add Trek</a>
+
+        <a href="/services" style="color: azure; margin-right: 15px;">Services</a>
+
+        <a href="/view_treks" style="color: azure; margin-right: 15px;">View_Treks</a>
+        <a href="/login" style="color: azure; margin-right: 15px;">Login</a>
+        <a href="/logout" style="color: azure; margin-right: 15px;">Logout</a>
+
     </nav>
     
 </body>

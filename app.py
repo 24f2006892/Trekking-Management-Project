@@ -1,4 +1,5 @@
-from flask import Flask , render_template , redirect
+from flask import Flask , render_template , redirect,request,session
+from werkzeug.security import generate_password_hash , check_password_hash
 import sqlite3
 
 app = Flask(__name__)
@@ -16,7 +17,7 @@ def init_db():
                  username TEXT UNIQUE NOT NULL,
                  email TEXT UNIQUE NOT NULL,
                  password TEXT NOT NULL
-                 role TEXT NOT NULL)
+                 role TEXT NOT NULl)
                  """)
     conn.execute("""
                 CREATE TABLE IF NOT EXISTS treks(
@@ -41,9 +42,22 @@ def init_db():
 def home():
     return "Trekking project"
 # Login
-@app.route("/login")
+@app.route("/login" , methods=["GET","POST"])
 def login():
-    return "Login"
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+        role = request.form["role"]
+
+        conn = get_db_connnection()
+        user = conn.execute("""
+                SELECT * FROM users WHERE username = ?
+                            """ (username,) ).fetchone
+        conn.close()
+        if user and check_password_hash(user["password"],password):
+            session["user"]=username
+            return("Login Successful")
+        
 
 @app.route("/register")
 def login():
