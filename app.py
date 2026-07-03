@@ -102,8 +102,33 @@ def book_trek(trek_id):
         " UPDATE treks SET slots = slots - 1 WHERE id = ? AND slots > 0",
         (trek_id,)
     )
+
+
     conn.commit()
     conn.close()
+#Delete treks
+@app.route("/delete_trek/<int:trek_id>",methods=["POST"])
+def delete_trek(trek_id):
+    conn = get_db_connnection()
+    conn.execute("DELETE FROM treks WHERE id = ?",(trek_id))
+    conn.commit()
+    conn.close()
+    return redirect("/view_treks")
+
+@app.route("/logout")
+def logout():
+    session.pop("user",None)
+    return redirect("/login")
+
+@app.route("/about")
+def about():
+    return render_template("about.html")
+@app.route("/contact")
+def contact():
+    return render_template("contact.html")
+@app.route("/services")
+def services():
+    return render_template("serices.html")
 
 
 
