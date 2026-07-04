@@ -1,10 +1,12 @@
 from flask import Flask , render_template , redirect,request,session
 from werkzeug.security import generate_password_hash , check_password_hash
 import sqlite3
+from flask import flash
 import os
 
 
 app = Flask(__name__)
+app.secret_key = "your_secret_key"
 def get_db_connnection():
     conn = sqlite3.connect("database.db")
     conn.row_factory =sqlite3.Row
@@ -18,20 +20,20 @@ def init_db():
                  id INTEGER PRIMARY KEY AUTOINCREMENT,
                  username TEXT UNIQUE NOT NULL,
                  email TEXT UNIQUE NOT NULL,
-                 password TEXT NOT NULL
-                 role TEXT NOT NULl)
+                 password TEXT NOT NULL,
+                 role TEXT NOT NULL)
                  """)
     conn.execute("""
                 CREATE TABLE IF NOT EXISTS treks(
-                 id INTEGER PRIMARY KEY AUTOINCEREMENT
+                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                  name TEXT NOT NULL,
-                 location TEXT NOT NULL
+                 location TEXT NOT NULL,
                  price INTEGER NOT NULL,
                  slots INTEGER NOT NULL
                  ) """)
     conn.execute(""" 
                 CREATE TABLE IF NOT EXISTS bookings(
-                 id INTEGER PRIMARY KEY AUTOINCEREMENT
+                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                  username TEXT NOT NULL,
                  trek_id INTEGER
                  ) """)
@@ -44,53 +46,72 @@ def init_db():
 def home():
     return "Trekking project"
 # Login
-@app.route("/login" , methods=["GET","POST"])
+@app.route("/login", methods=["GET", "POST"])
 def login():
+    msg = ""
+
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
         role = request.form["role"]
 
         conn = get_db_connnection()
-        user = conn.execute("""
-                SELECT * FROM users WHERE username = ?
-                            """ (username,) ).fetchone
+        user = conn.execute(
+            "SELECT * FROM users WHERE username=?",
+            (username,)
+        ).fetchone()
         conn.close()
-        if user and check_password_hash(user["password"],password):
-            session["user"]=username
-            return("Login Successful")
-        else:
-            return("Invalid Details")
 
+        if user and check_password_hash(user["password"], password):
+            session["user"] = username
+            return "Login Successful"
+        else:
+            msg = "Invalid Credentials"
+
+    return render_template("login.html", msg=msg)
         
 
-@app.route("/register" , methods=["GET", "POST"])
+@app.route("/register", methods=["GET","POST"])
 def register():
-    if request.method=="POST":
+    if request.method == "POST":
         username = request.form["username"]
         email = request.form["email"]
         password = request.form["password"]
 
         hashed_password = generate_password_hash(password)
+        
         conn = get_db_connnection()
-        conn.execute(""" 
-                    INSERT INTO users (username, email, password) VALUES (?, ?, ?)""",(username, email, hashed_password))
-        conn.commit()
+        try:
+            conn.execute(
+                "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
+                (username, email, hashed_password)
+            )
+            conn.commit()
+        except:
+            conn.close()
+            flash("User already exists")
+            return redirect("/register")
+        flash("Registration Done , Please Login")
         conn.close()
-    return "User Registered Successfully"
+        return redirect("/login")
+        
+    return render_template("register.html")
+
 
 # View treks backend 
-@app.route("view_treks")
+@app.route("/view_treks")
 def view_treks():
     return "This is a trek"
 #Book trek - user side
 @app.route("/book/<int:trek_id>", methods=["POST"])
 def book_trek(trek_id):
+    if "user" not in session:
+        return redirect("/login")
     username = session["user"]
     conn = get_db_connnection()
     #check trek
     trek = conn.execute(""" 
-                        SELECT * FROM treks WHERE  id=?   """,(trek_id)).fetchone
+                        SELECT * FROM treks WHERE  id=?   """,(trek_id)).fetchone()
     if not trek or trek["slots"]<=0:
         conn.close()
         return "No treks Available"
@@ -115,6 +136,21 @@ def delete_trek(trek_id):
     conn.close()
     return redirect("/view_treks")
 
+# Show Bookings 
+@app.route("/my_bookings")
+def my_bookings():
+    if "user" not in session:
+        return redirect("/login")
+    username = session["user"]
+    conn = get_db_connnection()
+    conn.execute("""
+                 SELECT treks.name, treks.location , treks.price
+                 FROM bookings 
+                 JOIN treks ON bookings.trek_id = treks.id
+                 WHERE bookings.username = ?""",(username,)).fetchall()
+    conn.close()
+    return render_template("my_bookings.html", bookings=bookings)
+
 @app.route("/logout")
 def logout():
     session.pop("user",None)
@@ -122,14 +158,35 @@ def logout():
 
 @app.route("/about")
 def about():
+    if "user" not in session:
+        return redirect("/login")
     return render_template("about.html")
 @app.route("/contact")
 def contact():
+    if "user" not in session:
+        return redirect("/login")
     return render_template("contact.html")
 @app.route("/services")
 def services():
-    return render_template("serices.html")
+    if "user" not in session:
+        return redirect("/login")
+    return render_template("services.html")
 
+# Admin
+@app.route("/admin/users")
+def view_users():
+    if "user" not in session or session["user"]!="admin":
+        return redirect("/login")
+    
+    conn = get_db_connnection()
+    bookings = conn.execute("""
+                            SELECT bookings.username, treks.name, treks.location
+                            FROM bookings
+                            JOIN treks on bookings.trek_id = treks.id
+                                 """).fetchall()
+    conn.close()
+    return render_template("admin_bookings.html", bookings=bookings)
+    
 
 
 

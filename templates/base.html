@@ -3,7 +3,7 @@
 <head>
     
     <title>Document</title>
-    <link rel="stylesheet" href="{{url_for("static", filename='css/style.css')}}">
+    <link rel="stylesheet" href="{{ url_for("static", filename='css/style.css') }}">
 </head>
 <body>
     <nav style="background: #1D2228; padding: 15px;">
@@ -24,7 +24,10 @@
         <a href="/login" style="color: azure; margin-right: 15px;">Login</a>
         <a href="/logout" style="color: azure; margin-right: 15px;">Logout</a>
 
-    </nav>
+    </nav>d
+    
+    {% block content %}
+    {% endblock %}
     
 </body>
 </html>
