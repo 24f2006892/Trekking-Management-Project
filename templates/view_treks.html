@@ -1,5 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
+<h1>Available Treks</h1>
+{% for trek in treks %}
+<div>
+   <h3>{{trek["name"]}}</h3> 
+   <p>{{trek["location"]}}</p>
+   <p>{{trek["price"]}}</p>
+   <p>{{trek["slots"]}}</p>
 
 
+</div>
+{% endfor %}
 {% endblock %}
