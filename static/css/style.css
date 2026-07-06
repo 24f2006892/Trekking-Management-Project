@@ -1,0 +1,62 @@
+p {
+    font-family: 'Courier New', Courier, monospace;
+    color: cadetblue;
+}
+body{
+    background-color:beige;
+}
+
+nav{ border: 2px solid black;
+    text-decoration: underline; 
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+} 
+#login_div{
+    background-color:#EFD1D4;
+    align-self: center;
+    align-content: center;
+    border: 3px solid #2c362e ;
+    border-radius: 10px;
+    margin: 100px auto;
+    padding: 20px;
+    width: 300px;
+}
+#register_div{
+    background-color: #EFD1D4;
+    align-self: center;
+    align-content: center;
+    border: 3px solid #2c362e ;
+    border-radius: 10px;
+    margin: 100px auto;
+    padding: 20px;
+    width: 300px;
+    padding-bottom: 40px;
+}
+
+#form_div input{
+    width: 90%;
+    padding: 10px;
+    margin: 8px 0;
+    border: 1px solid gray;
+    border-radius: 6px;
+    font-size: 15px;
+}
+
+#form_div button{
+    width: 95%;
+    padding: 10px;
+    background-color: green;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#login_div a{
+    text-decoration: none;
+}
+
+#contact-div{
+        background-color: #EFD1D4;
+        font-family: "Times New Roman", Times, serif;}
+        
