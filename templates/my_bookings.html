@@ -1,5 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
-
-
+<h1>My Bookings</h1>
+{% if bookings%}
+    {% for b in bookings %}
+    <div>
+    <h3>{{b["name"]}}</h3>
+    <p>Location: {{b["location"]}}</p>
+    <p>Price: {{b["price"]}}</p>
+    <hr>
+    </div>
+    {% endfor %}
+{% else %}
+    <p>No Bookings</p>    
+{% endif %}
 {% endblock %}

@@ -1,5 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
-
+<h1>Update Trek</h1>
+<form method="POST">
+    <input type="text" name="name" value="{{trek["name"]}}"><br><br>
+    <input type="text" name="location" value="{{trek["location"]}}">
+    <input type="number" name="price" value="={{trek["price"]}}"><br><br>
+    <input type="number" name="slots" value="{{trek["slots"]}}"><br><br>
+    <button type="submit">Update</button>
+</form>
 
 {% endblock %}
