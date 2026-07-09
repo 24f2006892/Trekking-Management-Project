@@ -1,15 +1,14 @@
-{% extends "base.html %}
+{% extends "base.html" %}
 {% block content %}
 <div id="register_div">
-    <h2>Register</h2>
+    <h2 style="text-align: center;">Register</h2>
 
     <form method="POST" id="form_div">
     <input type="text" name="username" placeholder="Email/username" required> <br><br>
-    <input type="number" name="Mobile No" placeholder="Contact" required> <br><br>
-    
+    <input type="number" name="mobile" placeholder="Contact" required> <br><br>
     <input type="password" name="password" placeholder="password" required> <br><br>
     <label for="role">Choose a Role</label>
-    <select  id="role" name="role">
+    <select  id="role_button" name="role">
         <option value="user">User</option>
         <option value="staff">Staff</option>
     </select>

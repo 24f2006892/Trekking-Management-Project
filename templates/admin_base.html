@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+<div class="admin-container">
+
+    <div class="sidebar">
+
+        <h2>Trek Admin</h2>
+
+        <a href="/admin_dashboard">Dashboard</a>
+        <a href="/trek">Add Treks</a>
+        <a href="/update_trek">Update Treks</a>
+        <a href="/manage_users">Manage Users</a>
+        <a href="/my_bookings">Manage Bookings</a>
+        <a href="/logout">Logout</a>
+
+    </div>
+
+    <div class="main-content">
+
+        {% block admin_content %}
+        {% endblock %}
+
+    </div>
+
+</div>
+
+</body>
+</html>

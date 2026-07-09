@@ -1,0 +1,53 @@
+{% extends "admin_base.html" %}
+{% block content %}
+<div id="admin-dashboard">
+    <h1 id="admin_users" style="text-align: center;">Admin Dashboard</h1>
+
+    <h1>Admin Dashboard</h1>
+
+<div class="dashboard-cards">
+
+    <div class="card">
+        <h3>Users</h3>
+        <p>{{ users_count }}</p>
+    </div>
+
+    <div class="card">
+        <h3>Treks</h3>
+        <p>{{ trek_count }}</p>
+    </div>
+
+    <div class="card">
+        <h3>Staff</h3>
+        <p>{{ staff_count }}</p>
+    </div>
+
+    <div class="card">
+        <h3>Bookings</h3>
+        <p>{{ bookings_count }}</p>
+    </div>
+
+</div>
+   {% endfor %}
+
+<table>
+    <tr>
+        <th>Username</th>
+        <th>Trek</th>
+        <th>Location</th>
+        <th>Status</th>
+    </tr>
+    {% for b in recent_bookings %}
+    <tr>
+        <td>{{ b["username"] }}</td>
+        <td>{{ b["name"] }}</td>
+        <td>{{ b["location"] }}</td>
+        <td>{{ b["status"] }}</td>
+    </tr>
+    {% endfor %}
+</table>
+</div> 
+    {% endfor %}
+
+
+{% endblock %}

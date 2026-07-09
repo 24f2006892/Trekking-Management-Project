@@ -20,9 +20,15 @@ def init_db():
                  id INTEGER PRIMARY KEY AUTOINCREMENT,
                  username TEXT UNIQUE NOT NULL,
                  email TEXT UNIQUE NOT NULL,
+                 mobile TEXT UNIQUE NOT NULL,
                  password TEXT NOT NULL,
-                 role TEXT NOT NULL)
+                 role TEXT NOT NULL DEFAULT 'user')
                  """)
+    
+    admin = conn.execute(" SELECT * FROM users WHERE role = 'admin' ").fetchone()
+    if not admin:
+        conn.execute(""" INSERT INTO users (username, email, password, role ) VALUEs (?, ?, ?, ?) 
+                    """,("admin", "admin@gmail.com", generate_password_hash("admin@123"), "admin") )
     conn.execute("""
                 CREATE TABLE IF NOT EXISTS treks(
                  id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -40,11 +46,14 @@ def init_db():
                  ) """)
     conn.execute(""" 
                 CREATE TABLE IF NOT EXISTS bookings(
-                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                 user_id INTEGER PRIMARY KEY ,
                  username TEXT NOT NULL,
-                 trek_id INTEGER
+                 trek_id INTEGER,
                  booking_date DATE ,
-                 status TEXT NOT NULL 
+                 status TEXT NOT NULL,
+                 FOREIGN KEY(trek_id) REFERENCES treks(id)),
+                 FOREIGN KEY(user_id) REFERENCES users(id)
+                 
                  ) """)
     conn.execute(""" 
                 CREATE TABLE IF NOT EXISTS staff(
@@ -52,9 +61,9 @@ def init_db():
                  name TEXT NOT NULL,
                  mobile INTEGER,
                  assigned_trek TEXT ,
-                 status TEXT NOT NULL 
-                 ) """)
-    conn.execute()
+                 status TEXT NOT NULL
+                  """)
+    
     conn.commit()
     conn.close()
     flash("Database Initialized Successfully")
@@ -147,14 +156,15 @@ def register():
         username = request.form["username"]
         email = request.form["email"]
         password = request.form["password"]
+        role = request.form["role"]
 
         hashed_password = generate_password_hash(password)
         
         conn = get_db_connnection()
         try:
             conn.execute(
-                "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
-                (username, email, hashed_password)
+                "INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)",
+                (username, email, hashed_password, role)
             )
             conn.commit()
         except:
@@ -245,33 +255,30 @@ def services():
         return redirect("/login")
     return render_template("services.html")
 
-# Admin
-@app.route("/admin/users")
-def view_users():
-    if "user" not in session or session["user"]!="admin":
-        return redirect("/login")
     
-    conn = get_db_connnection()
-    bookings = conn.execute("""
-                            SELECT bookings.username, treks.name, treks.location
-                            FROM bookings
-                            JOIN treks on bookings.trek_id = treks.id
-                                 """).fetchall()
-    conn.close()
-    return render_template("admin_bookings.html", bookings=bookings)
-    
-# Bookings show to admin
-@app.route("/admin/bookings")
-def view_bookings():
+#Admin dashboard
+@app.route("/admin_dashboard")
+def dashboard():
     if "user" not in session or session["user"] != "admin":
         return "Access Denied"
     conn = get_db_connnection()
-    bookings = conn.execute("""SELECT bookings.username, treks.name, treks.location
+
+    users_count = conn.execute(""" 
+                SELECT COUNT(*) FROM users """).fetchone()[0]
+    bookings_count = conn.execute(""" 
+                SELECT COUNT(*) FROM bookings """).fetchone()[0]
+    trek_count = conn.execute(""" 
+                SELECT COUNT(*) FROM treks """).fetchone()[0]
+    staff_count = conn.execute(""" 
+                SELECT COUNT(*) FROM staff """).fetchone()[0]
+
+    bookings = conn.execute("""SELECT bookings.username, treks.name, treks.location, treks.price
                     FROM bookings 
-                    JOIN treks ON bookings.id = treks.id
+                    JOIN treks ON bookings.trek_id = treks.id
                   """).fetchall()
+    
     conn.close()
-    return render_template("admin_bookings.html",bookings=bookings)
+    return render_template("admin_dashboard.html",bookings=bookings,user_count=users_count,bookings_count=bookings_count,trek_count=trek_count,staff_count=staff_count)
 
 #Add treks
 @app.route("/treks", methods=["GET","POST"])

@@ -51,6 +51,15 @@ nav{ border: 2px solid black;
     cursor: pointer;
     font-size: 16px;
 }
+#role_button{
+    width: 60%;
+    padding: 5px;
+    background-color: #1D2228;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    color: white;
+}
 
 #login_div a{
     text-decoration: none;
@@ -59,4 +68,18 @@ nav{ border: 2px solid black;
 #contact-div{
         background-color: #EFD1D4;
         font-family: "Times New Roman", Times, serif;}
-        
+
+#admin-dashboard{
+    background-color:#EFD1D4;
+}
+#dashboard-cards{
+    display: flex;
+    margin: 20px;
+    gap: 20px;
+}
+.card{
+    width: 100px;
+    border-radius: 6px;
+    background: wheat;
+    text-align: center;
+}
