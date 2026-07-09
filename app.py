@@ -29,13 +29,30 @@ def init_db():
                  name TEXT NOT NULL,
                  location TEXT NOT NULL,
                  price INTEGER NOT NULL,
-                 slots INTEGER NOT NULL
+                 slots INTEGER NOT NULL,
+                 difficulty TEXT NOT NULL,
+                 duration INTEGER NOT NULL,
+                 assigned_staffID INTEGER NOT NULL,
+                 start_date DATE ,
+                 end_date DATE ,
+                 description TEXT ,
+                 FOREIGN KEY (assigned_staffID) REFERENCES staff_profiles(id)
                  ) """)
     conn.execute(""" 
                 CREATE TABLE IF NOT EXISTS bookings(
                  id INTEGER PRIMARY KEY AUTOINCREMENT,
                  username TEXT NOT NULL,
                  trek_id INTEGER
+                 booking_date DATE ,
+                 status TEXT NOT NULL 
+                 ) """)
+    conn.execute(""" 
+                CREATE TABLE IF NOT EXISTS staff(
+                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                 name TEXT NOT NULL,
+                 mobile INTEGER,
+                 assigned_trek TEXT ,
+                 status TEXT NOT NULL 
                  ) """)
     conn.execute()
     conn.commit()
