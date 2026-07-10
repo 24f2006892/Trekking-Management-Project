@@ -61,7 +61,7 @@ def init_db():
                  name TEXT NOT NULL,
                  mobile INTEGER,
                  assigned_trek TEXT ,
-                 status TEXT NOT NULL
+                 status TEXT NOT NULL)
                   """)
     
     conn.commit()
@@ -80,7 +80,7 @@ def my_bookings():
         return redirect("/login")
     username = session["user"]
     conn = get_db_connnection()
-    conn.execute("""
+    bookings = conn.execute("""
                  SELECT treks.name, treks.location , treks.price
                  FROM bookings 
                  JOIN treks ON bookings.trek_id = treks.id
@@ -155,6 +155,7 @@ def register():
     if request.method == "POST":
         username = request.form["username"]
         email = request.form["email"]
+        mobile = request.form["mobile"]
         password = request.form["password"]
         role = request.form["role"]
 
@@ -166,6 +167,10 @@ def register():
                 "INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)",
                 (username, email, hashed_password, role)
             )
+            if role == "staff":
+                conn.execute("""
+                            INSERT INTO staff (name, mobile, assigned_trek, status)
+                            VALUES (?, ?, ?, ?)""", (username,mobile,"Not Assigned","Pending"))
             conn.commit()
         except:
             conn.close()
@@ -181,7 +186,26 @@ def register():
 # View treks backend 
 @app.route("/view_treks")
 def view_treks():
-    return "This is a trek"
+
+    conn = get_db_connnection()
+    search = request.args.get("search", "")
+    if search:
+        treks = conn.execute("""
+            SELECT *
+            FROM treks
+            WHERE name LIKE ?
+            OR id LIKE ?
+        """, ("%"+search+"%", "%"+search+"%")).fetchall()
+
+    else:
+        treks = conn.execute("""
+            SELECT *
+            FROM treks
+        """).fetchall()
+    conn.close()
+    return render_template("view_treks.html", treks=treks)
+
+
 #Book trek - user side
 @app.route("/book/<int:trek_id>", methods=["POST"])
 def book_trek(trek_id):
@@ -272,14 +296,156 @@ def dashboard():
     staff_count = conn.execute(""" 
                 SELECT COUNT(*) FROM staff """).fetchone()[0]
 
-    bookings = conn.execute("""SELECT bookings.username, treks.name, treks.location, treks.price
+    bookings = conn.execute("""SELECT bookings.username, treks.name, treks.location, treks.price, bookings.status
                     FROM bookings 
                     JOIN treks ON bookings.trek_id = treks.id
                   """).fetchall()
     
+    staff = conn.execute(""" 
+                        SELECT * FROM staff """).fetchall()
     conn.close()
-    return render_template("admin_dashboard.html",bookings=bookings,user_count=users_count,bookings_count=bookings_count,trek_count=trek_count,staff_count=staff_count)
+    return render_template("admin_dashboard.html",bookings=bookings,user_count=users_count,bookings_count=bookings_count,trek_count=trek_count,staff_count=staff_count,staff=staff)
+#Admin_side to manage users
+@app.route("/manage_users")
+def manage_users():
+    if "user" not in session or session["user"] != "admin":
+        return "Access Denied"
+    conn = get_db_connnection()
+    search = request.args.get("search","")
 
+    if search:
+        users = conn.execute("""
+                             SELECT * FROM users vWHERE username LIKE ? OR id LIKE ?""",("%"+search+"%","%"+search+"%")).fetchall()
+
+    else:
+        users = conn.execute(""" SELECT *FROM users""").fetchall()
+    conn.close()
+    return render_template("manage_users.html", users=users)
+
+
+@app.route("/manage_staff")
+def manage_staff():
+
+    if "user" not in session or session["user"] != "admin":
+        return "Access Denied"
+    conn = get_db_connnection()
+    search = request.args.get("search", "")
+    if search:
+        staff = conn.execute("""
+            SELECT *
+            FROM staff
+            WHERE name LIKE ?
+            OR CAST(id AS TEXT) LIKE ?
+        """, ("%" + search + "%", "%" + search + "%")).fetchall()
+    else:
+        staff = conn.execute("""
+            SELECT *
+            FROM staff
+        """).fetchall()
+    conn.close()
+    return render_template("manage_staff.html", staff=staff)
+
+
+@app.route("/manage_treks")
+def manage_treks():
+
+    if "user" not in session or session["user"]!="admin":
+        return redirect("/login")
+
+    conn=get_db_connnection()
+
+    treks=conn.execute("""
+
+    SELECT *
+
+    FROM treks
+
+    """).fetchall()
+
+    conn.close()
+
+    return render_template("manage_treks.html",treks=treks)
+
+@app.route("/approve_staff/<int:id>")
+def approve_staff(id):
+
+    conn=get_db_connnection()
+
+    conn.execute("""
+
+    UPDATE staff
+
+    SET status='Approved'
+
+    WHERE id=?
+
+    """,(id,))
+
+    conn.commit()
+
+    conn.close()
+
+    return redirect("/admin_dashboard")
+
+@app.route("/blacklist_staff/<int:id>")
+def blacklist_staff(id):
+
+    conn=get_db_connnection()
+
+    conn.execute("""
+
+    UPDATE staff
+
+    SET status='Blacklist'
+
+    WHERE id=?
+
+    """,(id,))
+
+    conn.commit()
+
+    conn.close()
+
+    return redirect("/admin_dashboard")
+
+@app.route("/assign_staff/<int:trek_id>",methods=["GET","POST"])
+def assign_staff(trek_id):
+
+    conn=get_db_connnection()
+
+    if request.method=="POST":
+
+        staff_id=request.form["staff_id"]
+
+        conn.execute("""
+
+        UPDATE treks
+
+        SET assigned_staffID=?
+
+        WHERE id=?
+
+        """,(staff_id,trek_id))
+
+        conn.commit()
+
+        conn.close()
+
+        return redirect("/view_treks")
+
+    staff=conn.execute("""
+
+    SELECT *
+
+    FROM staff
+
+    WHERE status='Approved'
+
+    """).fetchall()
+
+    conn.close()
+
+    return render_template("assign_staff.html",staff=staff)
 #Add treks
 @app.route("/treks", methods=["GET","POST"])
 def trek():

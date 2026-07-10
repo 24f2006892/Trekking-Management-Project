@@ -1,0 +1,36 @@
+<form method="GET">
+    <input type="text" name="search" placeholder="Search by ID or Name">
+        <button type="submit"> Search </button>
+</form>
+
+<br>
+
+<h2>Staff</h2>
+
+<table border="1">
+
+<tr>
+    <th>ID</th>
+    <th>Name</th>
+    <th>Mobile</th>
+    <th>Status</th>
+    <th>Assigned Trek</th>
+    <th>Action</th>
+</tr>
+
+{% for s in staff %}
+
+<tr>
+<td>{{ s["id"] }}</td>
+<td>{{ s["name"] }}</td>
+<td>{{ s["mobile"] }}</td>
+<td>{{ s["status"] }}</td>
+<td>{{ s["assigned_trek"] }}</td>
+<td>
+
+<a href="/approve_staff/{{ s['id'] }}">Approve</a>
+<a href="/blacklist_staff/{{ s['id'] }}">Blacklist</a>
+</td>
+</tr>
+{% endfor %}
+</table>

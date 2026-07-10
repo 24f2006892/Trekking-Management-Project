@@ -1,0 +1,15 @@
+{% extends "admin_base.html" %}
+{% block content %}
+
+<h2>Assign Staff</h2>
+
+<form method="POST">
+<select name="staff_id">
+{% for s in staff %}
+<option value="{{ s['id'] }}">{{ s["name"] }}</option>
+{% endfor %}
+</select>
+<button>Assign</button>
+</form>
+
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "admin_base.html" %}
+{% block content %}
+
+<h1>Manage Treks</h1>
+<table border="1">
+<tr>
+    <th>ID</th>
+    <th>Name</th>
+    <th>Location</th>
+    <th>Price</th>
+    <th>Slots</th>
+    <th>Action</th>
+</tr>
+
+{% for trek in treks %}
+<tr>
+<td>{{trek["id"]}}</td>
+<td>{{trek["name"]}}</td>
+<td>{{trek["location"]}}</td>
+<td>{{trek["price"]}}</td>
+<td>{{trek["slots"]}}</td>
+<td>
+
+<a href="/update_trek/{{trek['id']}}">Edit</a>
+|
+<form
+action="/delete_trek/{{trek['id']}}"
+method="POST"
+style="display:inline;">
+<button>Delete</button>
+
+</form>
+|
+<a href="/assign_staff/{{trek['id']}}">Assign Staff</a>
+</td>
+</tr>
+{% endfor %}
+</table>
+{% endblock %}

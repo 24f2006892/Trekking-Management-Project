@@ -9,7 +9,7 @@
 
     <div class="card">
         <h3>Users</h3>
-        <p>{{ users_count }}</p>
+        <p>{{ user_count }}</p>
     </div>
 
     <div class="card">
@@ -37,7 +37,7 @@
         <th>Location</th>
         <th>Status</th>
     </tr>
-    {% for b in recent_bookings %}
+    {% for b in bookings %}
     <tr>
         <td>{{ b["username"] }}</td>
         <td>{{ b["name"] }}</td>
@@ -47,7 +47,23 @@
     {% endfor %}
 </table>
 </div> 
-    {% endfor %}
+<h2>Staff</h1>
+    <table>
+        <tr>
+            <th>Staff Id</th>
+            <th>Name</th>
+            <th>mobile</th>
+            <th>Assigned Staff</th>
+        </tr>
+        {% for s in staff %}
+        <tr>
+            <td>{{ s["id"] }}</td>
+            <td>{{ s["name"] }}</td>
+            <td>{{ s["mobile"] }}</td>
+            <td>{{ s["assigned_trek"] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
 
 
 {% endblock %}
