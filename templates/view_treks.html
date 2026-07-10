@@ -3,30 +3,31 @@
 <h1>Available Treks</h1>
 {% for trek in treks %}
 <div>
-   <form method = "GET" action="/view_treks">
-      <input type="text" name="treks" placeholder="Search treks">
-      <button type="submit">Search</button>
-   </form>
-   <form action="/view_treks" method="GET">
-      <select name="price" id="price">
-         <option value="">All</option>
-         <option value="low">Below 1000</option>
-         <option value="medium">1000-5000</option>
-         <option value="high">Above 5000</option>
-      </select>
-      <button type="submit">Filter</button>
-   </form>
+   <form method="GET" action="/view_treks"></form>
+    <input type="text" name="search" placeholder="Search Trek">
+    <select name="difficulty">
+        <option value="">All Difficulty</option>
+        <option value="Easy">Easy</option>
+        <option value="Moderate">Moderate</option>
+        <option value="Hard">Hard</option>
+    </select>
+    <input type="text" name="location" placeholder="Location">
+    <button type="submit">Search</button>
+
+</form>
+
+<br>
    <h3>{{trek["name"]}}</h3> 
    <p>{{trek["location"]}}</p>
    <p>{{trek["price"]}}</p>
    <p>{{trek["slots"]}}</p>
    
-   <form action="/book/{{ trek["id"] }}">
-      {% if trek["slots"]>0 %}
+<form action="/book/{{ trek['id'] }}" method="POST">    
+   {% if trek["slots"]>0 %}
       <button type="submit">Book trek</button>
-      {% else %}
-         <p>Full</p>
-      {% endif %}
+   {% else %}
+      <p>Full</p>
+   {% endif %}
    </form>
 
 </div>

@@ -208,26 +208,28 @@ def register():
 # View treks backend 
 @app.route("/view_treks")
 def view_treks():
-
     conn = get_db_connnection()
     search = request.args.get("search", "")
+    difficulty = request.args.get("difficulty", "")
+    location = request.args.get("location", "")
+    query = """
+        SELECT *
+        FROM treks
+        WHERE status='Open'
+    """
+    values = []
     if search:
-        treks = conn.execute("""
-             SELECT *
-            FROM treks
-            WHERE status='Open'
-            AND (
-            name LIKE ?
-            OR CAST(id AS TEXT) LIKE ?)
-        """, ("%"+search+"%", "%"+search+"%")).fetchall()
-
-    else:
-        treks = conn.execute("""
-            SELECT *
-            FROM treks
-        """).fetchall()
+        query += " AND name LIKE ?"
+        values.append("%" + search + "%")
+    if difficulty:
+        query += " AND difficulty = ?"
+        values.append(difficulty)
+    if location:
+        query += " AND location LIKE ?"
+        values.append("%" + location + "%")
+    treks = conn.execute(query, values).fetchall()
     conn.close()
-    return render_template("view_treks.html", treks=treks)
+    return render_template( "view_treks.html",treks=treks)
 
 
 #Book trek - user side
@@ -244,15 +246,20 @@ def book_trek(trek_id):
         conn.close()
         return "No treks Available"
     # insert bookings
-    conn.execute(" INSERT INTO bookings (username, trek_id) VALUES (?, ?)",
-                 (username, trek_id))
+    # Get logged-in user
+    user = conn.execute("SELECT * FROM users WHERE username = ?",(username,)).fetchone()
+
+    # Insert booking
+    conn.execute("""
+    INSERT INTO bookings
+    (user_id, username, trek_id, booking_date, status)
+    VALUES (?, ?, ?, DATE('now'), ?)
+    """,
+    (user["id"],username,trek_id,"Booked"))
     # Update slots
     conn.execute(
         " UPDATE treks SET slots = slots - 1 WHERE id = ? AND slots > 0",
-        (trek_id,)
-    )
-
-
+        (trek_id,))
     conn.commit()
     conn.close()
 #Delete treks
