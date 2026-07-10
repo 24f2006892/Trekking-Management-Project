@@ -43,11 +43,12 @@ def init_db():
                  start_date DATE ,
                  end_date DATE ,
                  description TEXT ,
-                 FOREIGN KEY (assigned_staffID) REFERENCES staff_profiles(id)
+                 FOREIGN KEY (assigned_staffID) REFERENCES staff(id)
                  ) """)
     conn.execute(""" 
                 CREATE TABLE IF NOT EXISTS bookings(
-                 user_id INTEGER PRIMARY KEY ,
+                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER, 
                  username TEXT NOT NULL,
                  trek_id INTEGER,
                  booking_date DATE ,
@@ -88,41 +89,6 @@ def my_bookings():
                  WHERE bookings.username = ?""",(username,)).fetchall()
     conn.close()
     return render_template("my_bookings.html", bookings=bookings)
-#Book Treks (USER)
-app.route("/book/<int:trek_id>",methods=["POST"])
-def book_trek(trek_id):
-    if "user" not in session:
-        return redirect("/login")
-    username = session["user"]
-    conn = get_db_connnection()
-
-    #Check duplicate
-    existing = conn.execute("SELECT * FROM bookings WHERE username = ? AND trek_id = ?",
-                            (username, trek_id)).fetchone()
-    if existing:
-        conn.close()
-        flash("Already Booked")
-    #Check trek
-    trek = conn.execute(
-        "SELECT * FROM treks where id = ?",(trek_id)
-    ).fetchone()
-
-    if not trek or trek["slots"]<=0:
-        conn.close()
-        flash("No slots remaining")
-        return redirect("/view_treks")
-    # Insert bookings
-    conn.execute("INSERT INTO bookings (username, trek_id) VALUES (?, ?)",
-                 (username, trek_id))
-    #update treks
-    conn.execute("UPDATE treks SET slots = slots - 1 WHERE id = ? AND slots > 0",
-                 (trek_id))
-    conn.commit()
-    conn.close()
-
-    flash ("trek booked successfully")
-    return redirect("/view_treks")
-
 
 # Login
 @app.route("/login", methods=["GET", "POST"])
@@ -141,10 +107,10 @@ def login():
         ).fetchone()
         conn.close()
 
-    if user and check_password_hash(user["password"], password):
-        session["user"] = username
-        session["role"] = user["role"]
-        session["mobile"] = user["mobile"]
+        if user and check_password_hash(user["password"], password):
+            session["user"] = username
+            session["role"] = user["role"]
+            session["mobile"] = user["mobile"]
     if user["role"] == "admin":
             return redirect("/admin_dashboard")
 
@@ -346,7 +312,7 @@ def manage_users():
 
     if search:
         users = conn.execute("""
-                             SELECT * FROM users vWHERE username LIKE ? OR id LIKE ?""",("%"+search+"%","%"+search+"%")).fetchall()
+                             SELECT * FROM users WHERE username LIKE ? OR id LIKE ?""",("%"+search+"%","%"+search+"%")).fetchall()
 
     else:
         users = conn.execute(""" SELECT *FROM users""").fetchall()
@@ -495,7 +461,7 @@ def staff_dashboard():
     trek = None
 
     if staff:
-        trek = conn.execute("""SELECT * FROM treksWHERE assigned_staffID = ?
+        trek = conn.execute("""SELECT * FROM treks WHERE assigned_staffID = ?
         """, (staff["id"],)).fetchone()
 
     conn.close()
@@ -627,7 +593,7 @@ def trek():
         name = request.form["name"]
         location = request.form["location"]
         price = request.form["price"]
-        slots = request.fprm["slots"]
+        slots = request.form["slots"]
 
         conn = get_db_connnection()
         conn.execute(

@@ -1,16 +1,20 @@
-{% extends "base.html" %}
-{% block content %}
-<h1>My Bookings</h1>
-{% if bookings%}
-    {% for b in bookings %}
-    <div>
-    <h3>{{b["name"]}}</h3>
-    <p>Location: {{b["location"]}}</p>
-    <p>Price: {{b["price"]}}</p>
-    <hr>
-    </div>
-    {% endfor %}
-{% else %}
-    <p>No Bookings</p>    
-{% endif %}
-{% endblock %}
+<table>
+<tr>
+    <th>Name</th>
+    <th>Location</th>
+    <th>Price</th>
+    <th>Booking Date</th>
+    <th>Status</th>
+</tr>
+{% for booking in bookings %}
+<tr>
+    <td>{{ booking["name"] }}</td>
+    <td>{{ booking["location"] }}</td>
+    <td>{{ booking["price"] }}</td>
+    <td>{{ booking["booking_date"] }}</td>
+    <td>{{ booking["status"] }}</td>
+</tr>
+
+{% endfor %}
+
+</table>
