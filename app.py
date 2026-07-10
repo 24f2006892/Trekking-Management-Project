@@ -38,6 +38,7 @@ def init_db():
                  slots INTEGER NOT NULL,
                  difficulty TEXT NOT NULL,
                  duration INTEGER NOT NULL,
+                 status TEXT NOT NULL DEFAULT 'Open',
                  assigned_staffID INTEGER NOT NULL,
                  start_date DATE ,
                  end_date DATE ,
@@ -140,11 +141,32 @@ def login():
         ).fetchone()
         conn.close()
 
-        if user and check_password_hash(user["password"], password):
-            session["user"] = username
-            return "Login Successful"
-        else:
-            msg = "Invalid Credentials"
+    if user and check_password_hash(user["password"], password):
+        session["user"] = username
+        session["role"] = user["role"]
+        session["mobile"] = user["mobile"]
+    if user["role"] == "admin":
+            return redirect("/admin_dashboard")
+
+    elif user["role"] == "staff":
+        conn = get_db_connnection()
+        staff = conn.execute("""
+                                SELECT * FROM staff WHERE mobile = ?""", (user["mobile"],)).fetchone()
+
+        conn.close()
+
+        if not staff:
+            flash("Staff record not found.")
+            return redirect("/login")
+
+        if staff["status"] != "Approved":
+            flash("Your account is waiting for Admin approval.")
+            return redirect("/login")
+
+        return redirect("/staff_dashboard")
+
+    else:
+        return redirect("/view_treks")
 
     return render_template("login.html", msg=msg)
     
@@ -191,10 +213,12 @@ def view_treks():
     search = request.args.get("search", "")
     if search:
         treks = conn.execute("""
-            SELECT *
+             SELECT *
             FROM treks
-            WHERE name LIKE ?
-            OR id LIKE ?
+            WHERE status='Open'
+            AND (
+            name LIKE ?
+            OR CAST(id AS TEXT) LIKE ?)
         """, ("%"+search+"%", "%"+search+"%")).fetchall()
 
     else:
@@ -446,6 +470,144 @@ def assign_staff(trek_id):
     conn.close()
 
     return render_template("assign_staff.html",staff=staff)
+#staff_dashboard
+@app.route("/staff_dashboard")
+def staff_dashboard():
+
+    if "user" not in session or session["role"] != "staff":
+        return redirect("/login")
+
+    conn = get_db_connnection()
+
+    staff = conn.execute("""
+        SELECT *
+        FROM staff
+        WHERE mobile = ?
+    """, (session["mobile"],)).fetchone()
+
+    trek = None
+
+    if staff:
+        trek = conn.execute("""SELECT * FROM treksWHERE assigned_staffID = ?
+        """, (staff["id"],)).fetchone()
+
+    conn.close()
+
+    return render_template("staff_dashboard.html",staff=staff,trek=trek)
+
+@app.route("/update_trek_status", methods=["GET", "POST"])
+def update_trek_status():
+
+    if "user" not in session or session["role"] != "staff":
+        return redirect("/login")
+
+    conn = get_db_connnection()
+
+    staff = conn.execute("""
+        SELECT *
+        FROM staff
+        WHERE mobile=?
+    """, (session["mobile"],)).fetchone()
+
+    trek = conn.execute("""
+        SELECT *
+        FROM treks
+        WHERE assigned_staffID=?
+    """, (staff["id"],)).fetchone()
+
+    if request.method == "POST":
+
+        status = request.form["status"]
+
+        conn.execute("""
+            UPDATE treks
+            SET status=?
+            WHERE id=?
+        """, (status, trek["id"]))
+
+        conn.commit()
+        conn.close()
+
+        flash("Trek status updated.")
+        return redirect("/staff_dashboard")
+
+    conn.close()
+
+    return render_template("update_trek_status.html", trek=trek)
+
+@app.route("/update_slots", methods=["GET", "POST"])
+def update_slots():
+
+    if "user" not in session or session["role"] != "staff":
+        return redirect("/login")
+
+    conn = get_db_connnection()
+
+    # Get logged-in staff
+    staff = conn.execute("""
+        SELECT * FROM staff
+        WHERE mobile = ?
+    """, (session["mobile"],)).fetchone()
+
+    # Get assigned trek
+    trek = conn.execute("""
+        SELECT * FROM treks
+        WHERE assigned_staffID = ?
+    """, (staff["id"],)).fetchone()
+
+    if request.method == "POST":
+
+        slots = request.form["slots"]
+
+        conn.execute("""
+            UPDATE treks
+            SET slots = ?
+            WHERE id = ?
+        """, (slots, trek["id"]))
+
+        conn.commit()
+        conn.close()
+
+        flash("Slots updated successfully.")
+        return redirect("/staff_dashboard")
+
+    conn.close()
+
+    return render_template("update_slots.html", trek=trek)
+
+@app.route("/staff_bookings")
+def staff_bookings():
+
+    if "user" not in session or session["role"] != "staff":
+        return redirect("/login")
+
+    conn = get_db_connnection()
+
+    # Get logged-in staff
+    staff = conn.execute("""
+        SELECT * FROM staff WHERE mobile = ?
+    """, (session["mobile"],)).fetchone()
+
+    bookings = []
+
+    if staff:
+
+        bookings = conn.execute("""
+            SELECT
+                bookings.username,
+                bookings.booking_date,
+                bookings.status,
+                treks.name
+            FROM bookings JOIN treks ON bookings.trek_id = treks.id
+            WHERE treks.assigned_staffID = ?
+        """, (staff["id"],)).fetchall()
+
+    conn.close()
+
+    return render_template(
+        "staff_bookings.html",
+        bookings=bookings
+    )
 #Add treks
 @app.route("/treks", methods=["GET","POST"])
 def trek():

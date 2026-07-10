@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Bookings</title>
+</head>
+<body>
+
+<h2>Bookings For My Trek</h2>
+
+<table border="1">
+
+<tr>
+    <th>Customer</th>
+    <th>Trek</th>
+    <th>Booking Date</th>
+    <th>Status</th>
+</tr>
+
+{% for b in bookings %}
+
+<tr>
+<td>{{ b["username"] }}</td>
+<td>{{ b["name"] }}</td>
+<td>{{ b["booking_date"] }}</td>
+<td>{{ b["status"] }}</td>
+</tr>
+
+{% endfor %}
+
+</table>
+
+<br>
+<a href="/staff_dashboard">
+    Back
+</a>
+
+</body>
+</html>

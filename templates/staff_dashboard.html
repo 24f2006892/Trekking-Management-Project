@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Staff Dashboard</title>
+</head>
+<body>
+<h1>Staff Dashboard</h1>
+<h3>Welcome {{ staff["name"] }}</h3>
+<p>Status : {{ staff["status"] }}</p>
+
+{% if trek %}
+<h2>Your Assigned Trek</h2>
+<table border="1">
+<tr>
+    <th>Name</th>
+    <th>Location</th>
+    <th>Price</th>
+    <th>Slots</th>
+</tr>
+<tr>
+    <td>{{ trek["name"] }}</td>
+    <td>{{ trek["location"] }}</td>
+    <td>{{ trek["price"] }}</td>
+    <td>{{ trek["slots"] }}</td>
+</tr>
+</table>
+
+{% else %}
+
+<h2>No Trek Assigned</h2>
+
+{% endif %}
+
+<br>
+<br>
+
+<a href="/staff_bookings">View My Bookings</a><br><br>
+<a href="/update_slots"> Update Available Slots </a><br><br>
+<a href="/update_trek_status"> Update Trek Status </a><br><br>
+<a href="/logout">Logout</a>
+
+</body>
+</html>

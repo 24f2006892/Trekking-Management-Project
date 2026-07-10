@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Update Slots</title>
+</head>
+<body>
+<h2>Update Available Slots</h2>
+<form method="POST">
+    <p><strong>{{ trek["name"] }}</strong></p>
+    <label>Available Slots</label><br>
+    <input type="number" name="slots" value="{{ trek['slots'] }}" required> <br><br>
+
+    <button type="submit"> Update </button>
+</form>
+<br>
+<a href="/staff_dashboard">Back</a>
+
+</body>
+</html>
