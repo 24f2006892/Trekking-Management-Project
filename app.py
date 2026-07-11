@@ -238,7 +238,7 @@ def book_trek(trek_id):
     conn = get_db_connnection()
     #check trek
     trek = conn.execute(""" 
-                        SELECT * FROM treks WHERE  id=?   """,(trek_id)).fetchone()
+                        SELECT * FROM treks WHERE  id=?   """,(trek_id,)).fetchone()
     if not trek or trek["slots"]<=0:
         conn.close()
         return "No treks Available"
@@ -248,10 +248,7 @@ def book_trek(trek_id):
 
     # Insert booking
     conn.execute("""
-    INSERT INTO bookings
-    (user_id, username, trek_id, booking_date, status)
-    VALUES (?, ?, ?, DATE('now'), ?)
-    """,
+    INSERT INTO bookings (user_id, username, trek_id, booking_date, status) VALUES (?, ?, ?, DATE('now'), ?)""",
     (user["id"],username,trek_id,"Booked"))
     # Update slots
     conn.execute(
@@ -259,6 +256,10 @@ def book_trek(trek_id):
         (trek_id,))
     conn.commit()
     conn.close()
+    flash("Trek booked successfully!")
+    return redirect("/my_bookings")
+
+
 #Delete treks
 @app.route("/delete_trek/<int:trek_id>",methods=["POST"])
 def delete_trek(trek_id):

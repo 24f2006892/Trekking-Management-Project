@@ -2,6 +2,17 @@
 {% block content %}
 
 <h1>Manage Treks</h1>
+
+<form method="GET" action="/manage_treks">
+    <input type="text"
+           name="search"
+           placeholder="Search by Trek Name or Location"
+           value="{{ request.args.get('search','') }}">
+
+    <button type="submit" class="sbtn">Search</button>
+</form>
+
+<br>
 <table border="1">
 <tr>
     <th>ID</th>
@@ -21,7 +32,7 @@
 <td>{{trek["slots"]}}</td>
 <td>
 
-<a href="/update_trek/{{trek['id']}}" class="sbtn">Edit</a>
+<a href="/update_trek/{{trek['id']}}" class="sbtn">Update</a>
 |
 <form
 action="/delete_trek/{{trek['id']}}"

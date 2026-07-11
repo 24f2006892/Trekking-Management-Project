@@ -1,12 +1,42 @@
-{% extends "base.html" %}
+{% extends "admin_base.html" %}
 {% block content %}
+
 <h1>Update Trek</h1>
+
 <form method="POST">
-    <input type="text" name="name" value="{{trek["name"]}}"><br><br>
-    <input type="text" name="location" value="{{trek["location"]}}">
-    <input type="number" name="price" value="={{trek["price"]}}"><br><br>
-    <input type="number" name="slots" value="{{trek["slots"]}}"><br><br>
-    <button type="submit" class="sbtn">Update</button>
+
+    <input type="text"
+           name="name"
+           value="{{ trek['name'] }}"
+           placeholder="Trek Name">
+
+    <br><br>
+
+    <input type="text"
+           name="location"
+           value="{{ trek['location'] }}"
+           placeholder="Location">
+
+    <br><br>
+
+    <input type="number"
+           name="price"
+           value="{{ trek['price'] }}"
+           placeholder="Price">
+
+    <br><br>
+
+    <input type="number"
+           name="slots"
+           value="{{ trek['slots'] }}"
+           placeholder="Slots">
+
+    <br><br>
+
+    <button type="submit" class="btn">
+        Update Trek
+    </button>
+
 </form>
 
 {% endblock %}
