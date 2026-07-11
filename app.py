@@ -71,9 +71,9 @@ def init_db():
     flash("Database Initialized Successfully")
     return redirect("/")
     
-@app.route('/home')
+@app.route('/')
 def home():
-    return "Trekking project"
+    return render_template("home.html")
 
 # Show Bookings 
 @app.route("/my_bookings")
@@ -189,7 +189,7 @@ def register():
             if role == "staff":
                 conn.execute("""
                             INSERT INTO staff (name, mobile, assigned_trek, status)
-                            VALUES (?, ?, ?, ?)""", (username,mobile,"Not Assigned","Pending"))
+                            VALUES (?, ?, ?, ?)""", (username, mobile, "Not Assigned", "Pending"))
             conn.commit()
         except:
             conn.close()
@@ -263,28 +263,46 @@ def book_trek(trek_id):
 @app.route("/delete_trek/<int:trek_id>",methods=["POST"])
 def delete_trek(trek_id):
     conn = get_db_connnection()
-    conn.execute("DELETE FROM treks WHERE id = ?",(trek_id))
+    conn.execute("DELETE FROM treks WHERE id = ?",(trek_id,))
     conn.commit()
     conn.close()
     return redirect("/view_treks")
 #Update treks 
-@app.route("/update_trek/<int:trek_id>",methods=["GET","POST"])
+@app.route("/update_trek/<int:trek_id>", methods=["GET", "POST"])
 def update_trek(trek_id):
-    if session["user"]!="admin":
+
+    if "user" not in session or session["user"] != "admin":
         return redirect("/login")
+
     conn = get_db_connnection()
-    if request.method=="POST":
+
+    # Get current trek details
+    trek = conn.execute(
+        "SELECT * FROM treks WHERE id = ?",
+        (trek_id,)
+    ).fetchone()
+
+    if request.method == "POST":
+
         name = request.form["name"]
         location = request.form["location"]
         price = request.form["price"]
         slots = request.form["slots"]
 
-    conn.execute("""
-                UPDATE treks SET name = ?, location = ?, price = ?, slots = ?
-                WHERE id = ? """, (name, location, price, slots, trek_id))
-    conn.commit()
+        conn.execute("""
+            UPDATE treks
+            SET name = ?, location = ?, price = ?, slots = ?
+            WHERE id = ?
+        """, (name, location, price, slots, trek_id))
+
+        conn.commit()
+        conn.close()
+
+        flash("Trek Updated Successfully")
+        return redirect("/manage_treks")
+
     conn.close()
-    return redirect("/view_treks")
+    return render_template("update_trek.html", trek=trek)
 
 @app.route("/logout")
 def logout():

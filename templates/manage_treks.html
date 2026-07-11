@@ -21,17 +21,17 @@
 <td>{{trek["slots"]}}</td>
 <td>
 
-<a href="/update_trek/{{trek['id']}}">Edit</a>
+<a href="/update_trek/{{trek['id']}}" class="sbtn">Edit</a>
 |
 <form
 action="/delete_trek/{{trek['id']}}"
 method="POST"
 style="display:inline;">
-<button>Delete</button>
+<button class="sbtn">Delete</button>
 
 </form>
 |
-<a href="/assign_staff/{{trek['id']}}">Assign Staff</a>
+<a href="/assign_staff/{{trek['id']}}" class="sbtn">Assign Staff</a>
 </td>
 </tr>
 {% endfor %}

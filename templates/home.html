@@ -1,8 +1,46 @@
 {% extends "base.html" %}
+
 {% block content %}
-<h2>Welcome to the trekking Management App</h2>
-{% if "user" in session %}
-<p>Logged in as: {{ session["user"] }}</p>
-{% endif %}
-<a href="/contact">Contact us</a>
+
+<div style="text-align:center; margin-top:40px;">
+
+    <h1 style="font-size:42px; color:#1D2228;">
+        🏔 Trekking Management System
+    </h1>
+
+    <p style="font-size:20px; margin-top:15px;">
+        Welcome to the Trekking Management System.
+    </p>
+
+    {% if "user" in session %}
+
+        <p style="margin-top:20px; font-size:18px;">
+            Logged in as <b>{{ session["user"] }}</b>
+        </p>
+
+        <br>
+
+        {% if session["role"] == "admin" %}
+            <a href="/admin_dashboard" class="btn">Go to Dashboard</a>
+
+        {% elif session["role"] == "staff" %}
+            <a href="/staff_dashboard" class="btn">Go to Dashboard</a>
+
+        {% else %}
+            <a href="/view_treks" class="btn">Explore Treks</a>
+            <a href="/my_bookings" class="btn">My Bookings</a>
+        {% endif %}
+
+    {% else %}
+
+        <br>
+
+        <a href="/login" class="btn">Login</a>
+
+        <a href="/register" class="btn">Register</a>
+
+    {% endif %}
+
+</div>
+
 {% endblock %}

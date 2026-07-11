@@ -1,35 +1,53 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Available Treks</h1>
-{% for trek in treks %}
-<div>
-   <form method="GET" action="/view_treks"></form>
+
+<h1 style="text-align:center;">Available Treks</h1>
+
+<form method="GET" action="/view_treks" class="search-form">
+
     <input type="text" name="search" placeholder="Search Trek">
+
     <select name="difficulty">
         <option value="">All Difficulty</option>
         <option value="Easy">Easy</option>
         <option value="Moderate">Moderate</option>
         <option value="Hard">Hard</option>
     </select>
+
     <input type="text" name="location" placeholder="Location">
-    <button type="submit">Search</button>
+
+    <button type="submit" class="sbtn">
+        Search
+    </button>
 
 </form>
 
-<br>
-   <h3>{{trek["name"]}}</h3> 
-   <p>{{trek["location"]}}</p>
-   <p>{{trek["price"]}}</p>
-   <p>{{trek["slots"]}}</p>
-   
-<form action="/book/{{ trek['id'] }}" method="POST">    
-   {% if trek["slots"]>0 %}
-      <button type="submit">Book trek</button>
-   {% else %}
-      <p>Full</p>
-   {% endif %}
-   </form>
+{% for trek in treks %}
+
+<div class="trek-card">
+
+    <h2>{{ trek["name"] }}</h2>
+    <p><b>Location:</b> {{ trek["location"] }}</p>
+    <p><b>Price:</b> ₹{{ trek["price"] }}</p>
+    <p><b>Available Slots:</b> {{ trek["slots"] }}</p>
+    <form action="/book/{{ trek['id'] }}" method="POST">
+
+        {% if trek["slots"] > 0 %}
+
+            <button type="submit" class="sbtn">
+                Book Trek
+            </button>
+
+        {% else %}
+
+            <p style="color:red;"><b>Full</b></p>
+
+        {% endif %}
+
+    </form>
 
 </div>
+
 {% endfor %}
+
 {% endblock %}

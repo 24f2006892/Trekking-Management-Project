@@ -2,11 +2,13 @@
 <html>
 <head>
     <title>Staff Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
+
 <body>
-<h1>Staff Dashboard</h1>
-<h3>Welcome {{ staff["name"] }}</h3>
-<p>Status : {{ staff["status"] }}</p>
+<h1 style="text-align: center;">Staff Dashboard</h1>
+<h3>Welcome {{ staff["name"] }}</h3> <br>
+<p style="font-size: 15px;">Status : {{ staff["status"] }}</p> <br>
 
 {% if trek %}
 <h2>Your Assigned Trek</h2>
@@ -33,11 +35,12 @@
 
 <br>
 <br>
-
-<a href="/staff_bookings">View My Bookings</a><br><br>
-<a href="/update_slots"> Update Available Slots </a><br><br>
-<a href="/update_trek_status"> Update Trek Status </a><br><br>
-<a href="/logout">Logout</a>
+<div class="staff-links">
+<a href="/staff_bookings" class="sbtn" >View My Bookings</a><br><br>
+<a href="/update_slots" class="sbtn"> Update Available Slots </a><br><br>
+<a href="/update_trek_status" class="sbtn"> Update Trek Status </a><br><br>
+<a href="/logout" class="sbtn" style="background-color: red;">Logout</a>
+</div>
 
 </body>
 </html>
