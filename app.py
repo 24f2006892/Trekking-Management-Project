@@ -71,7 +71,7 @@ def init_db():
     flash("Database Initialized Successfully")
     return redirect("/")
     
-@app.route('/')
+@app.route('/home')
 def home():
     return "Trekking project"
 
@@ -83,14 +83,21 @@ def my_bookings():
     username = session["user"]
     conn = get_db_connnection()
     bookings = conn.execute("""
-                 SELECT treks.name, treks.location , treks.price
-                 FROM bookings 
-                 JOIN treks ON bookings.trek_id = treks.id
-                 WHERE bookings.username = ?""",(username,)).fetchall()
+    SELECT
+        treks.name,
+        treks.location,
+        treks.price,
+        bookings.booking_date,
+        bookings.status
+    FROM bookings
+    JOIN treks
+        ON bookings.trek_id = treks.id
+    WHERE bookings.username = ?
+""", (username,)).fetchall()
     conn.close()
     return render_template("my_bookings.html", bookings=bookings)
 
-# Login
+
 # Login
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -108,25 +115,7 @@ def login():
             "SELECT * FROM users WHERE username = ?",
             (username,)
         ).fetchone()
-
         conn.close()
-
-        # ---------------- DEBUG ----------------
-        print("\n========== LOGIN DEBUG ==========")
-        print("Username Entered :", username)
-        print("Password Entered :", password)
-        print("Role Selected    :", role)
-        print("User Found       :", user)
-
-        if user:
-            print("Stored Role      :", user["role"])
-            print("Stored Mobile    :", user["mobile"])
-            print("Password Match   :", check_password_hash(user["password"], password))
-        else:
-            print("User not found in database")
-
-        print("=================================\n")
-        # ---------------------------------------
 
         if not user:
             flash("User not found.")
@@ -194,7 +183,7 @@ def register():
         conn = get_db_connnection()
         try:
             conn.execute(
-                "INSERT INTO users (username, email, mobile, password, role) VALUES (?, ?, ?, ?)",
+                "INSERT INTO users (username, email, mobile, password, role) VALUES (?, ?, ?, ?, ?)",
                 (username, email, mobile, hashed_password, role)
             )
             if role == "staff":
@@ -302,23 +291,12 @@ def logout():
     session.pop("user",None)
     return redirect("/login")
 
-@app.route("/about")
-def about():
-    if "user" not in session:
-        return redirect("/login")
-    return render_template("about.html")
 @app.route("/contact")
 def contact():
     if "user" not in session:
         return redirect("/login")
     return render_template("contact.html")
-@app.route("/services")
-def services():
-    if "user" not in session:
-        return redirect("/login")
-    return render_template("services.html")
 
-    
 #Admin dashboard
 @app.route("/admin_dashboard")
 def dashboard():
@@ -623,29 +601,43 @@ def staff_bookings():
         "staff_bookings.html",
         bookings=bookings
     )
-#Add treks
-@app.route("/treks", methods=["GET","POST"])
+#add treks
+@app.route("/treks", methods=["GET", "POST"])
 def trek():
-    
-    if session["user"] != "admin":
+    if "user" not in session or session["user"] != "admin":
         flash("Access Denied")
         return redirect("/login")
-    
+    conn = get_db_connnection()
+    # Get approved staff for dropdown
+    staff = conn.execute("""
+        SELECT id, name
+        FROM staff
+        WHERE status = 'Approved'
+    """).fetchall()
     if request.method == "POST":
         name = request.form["name"]
         location = request.form["location"]
         price = request.form["price"]
         slots = request.form["slots"]
+        difficulty = request.form["difficulty"]
+        duration = request.form["duration"]
+        assigned_staffID = request.form["assigned_staffID"]
+        start_date = request.form["start_date"]
+        end_date = request.form["end_date"]
+        description = request.form["description"]
+        conn.execute("""
+            INSERT INTO treks (name, location, price, slots, difficulty, duration, assigned_staffID, start_date, end_date, description)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",(name, location, price, slots, difficulty, duration, assigned_staffID, start_date, end_date, description
+        ))
 
-        conn = get_db_connnection()
-        conn.execute(
-            "INSERT INTO treks (name, location, price, slots) VALUES (?, ?, ?, ?)",
-            (name,location,price,slots)
-        )
         conn.commit()
         conn.close()
 
-        return redirect("/view_treks")
+        flash("Trek Added Successfully")
+        return redirect("/manage_treks")
+
+    conn.close()
+    return render_template("trek.html", staff=staff)
 
 
 

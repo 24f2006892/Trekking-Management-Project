@@ -1,6 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>My Bookings</h2>
 <table>
 <tr>
-    <th>Name</th>
+    <th>Trek</th>
     <th>Location</th>
     <th>Price</th>
     <th>Booking Date</th>
@@ -10,11 +15,11 @@
 <tr>
     <td>{{ booking["name"] }}</td>
     <td>{{ booking["location"] }}</td>
-    <td>{{ booking["price"] }}</td>
+    <td>₹{{ booking["price"] }}</td>
     <td>{{ booking["booking_date"] }}</td>
     <td>{{ booking["status"] }}</td>
 </tr>
-
 {% endfor %}
-
 </table>
+
+{% endblock %}

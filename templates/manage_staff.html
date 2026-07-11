@@ -1,0 +1,65 @@
+{% extends "admin_base.html" %}
+
+{% block content %}
+
+<h2>Manage Staff</h2>
+
+<form method="GET">
+
+    <input
+        type="text"
+        name="search"
+        placeholder="Search by ID or Name">
+
+    <button type="submit" class="sbtn">
+        Search
+    </button>
+
+</form>
+
+<br>
+
+<table>
+
+<tr>
+    <th>ID</th>
+    <th>Name</th>
+    <th>Mobile</th>
+    <th>Status</th>
+    <th>Assigned Trek</th>
+    <th>Action</th>
+</tr>
+
+{% for s in staff %}
+
+<tr>
+
+    <td>{{ s["id"] }}</td>
+
+    <td>{{ s["name"] }}</td>
+
+    <td>{{ s["mobile"] }}</td>
+
+    <td>{{ s["status"] }}</td>
+
+    <td>{{ s["assigned_trek"] }}</td>
+
+    <td>
+
+        <a href="/approve_staff/{{ s['id'] }}" class="btn btn-success">
+            Approve
+        </a>
+
+        <a href="/blacklist_staff/{{ s['id'] }}" class="btn btn-danger">
+            Blacklist
+        </a>
+
+    </td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+{% endblock %}

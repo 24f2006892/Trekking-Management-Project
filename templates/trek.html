@@ -1,13 +1,35 @@
-{% extends "base.html" %}
+{% extends "admin_base.html" %}
 {% block content %}
-<h1>Add Trek</h1>
+<div id="add_trek">
+<h2>Add New Trek</h2>
 <form method="POST">
-    <input type="text" name="name" placeholder="Trek" required>
-    <input type="text" name="location" placeholder="Location" required><br><br>
-    <input type="number" name="price" placeholder="Price" required><br><br>
-    <input type="number" name="slots" placeholder=" Available Slots" required><br><br>
-    <button type="submit">Add Trek</button>
+    <input type="text" name="name" placeholder="Trek Name" required>
+    <input type="text" name="location" placeholder="Location" required>
+    <input type="number" name="price" placeholder="Price" required>
+    <input type="number" name="slots" placeholder="Slots" required>
+    <select name="difficulty" required>
+        <option value="">Difficulty</option>
+        <option>Easy</option>
+        <option>Medium</option>
+        <option>Hard</option>
+    </select>
+    <input type="number" name="duration" placeholder="Duration (Days)" required>
+    <select name="assigned_staffID">
+        <option value="">Assign Staff</option>
+        {% for s in staff %}
+        <option value="{{ s['id'] }}">
+            {{ s['name'] }}
+        </option>
+        {% endfor %}
 
+    </select>
+    <label>Start Date</label>
+    <input type="date" name="start_date">
+    <label>End Date</label>
+    <input type="date" name="end_date">
+    <textarea name="description" rows="4" placeholder="Description"> </textarea>
 
+    <button type="submit" class="btn"> Add Trek</button>
 </form>
+</div>
 {% endblock %}
