@@ -20,15 +20,15 @@ def init_db():
                  id INTEGER PRIMARY KEY AUTOINCREMENT,
                  username TEXT UNIQUE NOT NULL,
                  email TEXT UNIQUE NOT NULL,
-                 mobile TEXT UNIQUE NOT NULL,
+                 mobile TEXT UNIQUE,
                  password TEXT NOT NULL,
                  role TEXT NOT NULL DEFAULT 'user')
                  """)
     
     admin = conn.execute(" SELECT * FROM users WHERE role = 'admin' ").fetchone()
     if not admin:
-        conn.execute(""" INSERT INTO users (username, email, password, role ) VALUEs (?, ?, ?, ?) 
-                    """,("admin", "admin@gmail.com", generate_password_hash("admin@123"), "admin") )
+        conn.execute(""" INSERT INTO users (username, email, mobile, password, role ) VALUEs (?, ?, ?, ?, ?) 
+                    """,("admin", "admin@gmail.com","9876543210", generate_password_hash("admin@123"), "admin") )
     conn.execute("""
                 CREATE TABLE IF NOT EXISTS treks(
                  id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -53,7 +53,7 @@ def init_db():
                  trek_id INTEGER,
                  booking_date DATE ,
                  status TEXT NOT NULL,
-                 FOREIGN KEY(trek_id) REFERENCES treks(id)),
+                 FOREIGN KEY(trek_id) REFERENCES treks(id),
                  FOREIGN KEY(user_id) REFERENCES users(id)
                  
                  ) """)
@@ -91,52 +91,94 @@ def my_bookings():
     return render_template("my_bookings.html", bookings=bookings)
 
 # Login
+# Login
 @app.route("/login", methods=["GET", "POST"])
 def login():
     msg = ""
 
     if request.method == "POST":
+
         username = request.form["username"]
         password = request.form["password"]
         role = request.form["role"]
 
         conn = get_db_connnection()
+
         user = conn.execute(
-            "SELECT * FROM users WHERE username=?",
+            "SELECT * FROM users WHERE username = ?",
             (username,)
         ).fetchone()
+
         conn.close()
 
-        if user and check_password_hash(user["password"], password):
-            session["user"] = username
-            session["role"] = user["role"]
-            session["mobile"] = user["mobile"]
-    if user["role"] == "admin":
+        # ---------------- DEBUG ----------------
+        print("\n========== LOGIN DEBUG ==========")
+        print("Username Entered :", username)
+        print("Password Entered :", password)
+        print("Role Selected    :", role)
+        print("User Found       :", user)
+
+        if user:
+            print("Stored Role      :", user["role"])
+            print("Stored Mobile    :", user["mobile"])
+            print("Password Match   :", check_password_hash(user["password"], password))
+        else:
+            print("User not found in database")
+
+        print("=================================\n")
+        # ---------------------------------------
+
+        if not user:
+            flash("User not found.")
+            return redirect("/login")
+
+        if not check_password_hash(user["password"], password):
+            flash("Incorrect password.")
+            return redirect("/login")
+
+        if user["role"] != role:
+            flash("Incorrect role selected.")
+            return redirect("/login")
+
+        # Login successful
+        session["user"] = user["username"]
+        session["role"] = user["role"]
+        session["mobile"] = user["mobile"]
+
+        # Admin
+        if user["role"] == "admin":
+            print("Redirecting to Admin Dashboard")
             return redirect("/admin_dashboard")
 
-    elif user["role"] == "staff":
-        conn = get_db_connnection()
-        staff = conn.execute("""
-                                SELECT * FROM staff WHERE mobile = ?""", (user["mobile"],)).fetchone()
+        # Staff
+        elif user["role"] == "staff":
 
-        conn.close()
+            conn = get_db_connnection()
 
-        if not staff:
-            flash("Staff record not found.")
-            return redirect("/login")
+            staff = conn.execute(
+                "SELECT * FROM staff WHERE mobile = ?",
+                (user["mobile"],)
+            ).fetchone()
 
-        if staff["status"] != "Approved":
-            flash("Your account is waiting for Admin approval.")
-            return redirect("/login")
+            conn.close()
 
-        return redirect("/staff_dashboard")
+            if not staff:
+                flash("Staff record not found.")
+                return redirect("/login")
 
-    else:
-        return redirect("/view_treks")
+            if staff["status"] != "Approved":
+                flash("Your account is waiting for Admin approval.")
+                return redirect("/login")
 
-    return render_template("login.html", msg=msg)
-    
-        
+            print("Redirecting to Staff Dashboard")
+            return redirect("/staff_dashboard")
+
+        # Normal User
+        else:
+            print("Redirecting to User Dashboard")
+            return redirect("/view_treks")
+
+    return render_template("login.html", msg=msg)        
 # Register 
 @app.route("/register", methods=["GET","POST"])
 def register():
@@ -152,8 +194,8 @@ def register():
         conn = get_db_connnection()
         try:
             conn.execute(
-                "INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)",
-                (username, email, hashed_password, role)
+                "INSERT INTO users (username, email, mobile, password, role) VALUES (?, ?, ?, ?)",
+                (username, email, mobile, hashed_password, role)
             )
             if role == "staff":
                 conn.execute("""
