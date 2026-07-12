@@ -234,6 +234,9 @@ def view_treks():
 def book_trek(trek_id):
     if "user" not in session:
         return redirect("/login")
+    if session["user"] == "admin":
+        flash("Admin cannot book treks.")
+        return redirect("/admin_dashboard")
     username = session["user"]
     conn = get_db_connnection()
     #check trek
@@ -444,44 +447,44 @@ def blacklist_staff(id):
 
     return redirect("/admin_dashboard")
 
-@app.route("/assign_staff/<int:trek_id>",methods=["GET","POST"])
+@app.route("/assign_staff/<int:trek_id>", methods=["GET", "POST"])
 def assign_staff(trek_id):
 
-    conn=get_db_connnection()
+    conn = get_db_connnection()
 
-    if request.method=="POST":
+    if request.method == "POST":
+        staff_id = request.form["staff_id"]
+        # Update trek
+        conn.execute(
+            "UPDATE treks SET assigned_staffID=? WHERE id=?",
+            (staff_id, trek_id)
+        )
 
-        staff_id=request.form["staff_id"]
+        # Get trek name
+        trek = conn.execute(
+            "SELECT name FROM treks WHERE id=?",
+            (trek_id,)
+        ).fetchone()
 
-        conn.execute("""
+        print("TREK =", trek["name"])
 
-        UPDATE treks
-
-        SET assigned_staffID=?
-
-        WHERE id=?
-
-        """,(staff_id,trek_id))
-
+        # Update staff
+        conn.execute(
+            "UPDATE staff SET assigned_trek=? WHERE id=?",
+            (trek["name"], staff_id)
+        )
         conn.commit()
-
         conn.close()
+        return redirect("/admin_dashboard")
 
-        return redirect("/view_treks")
-
-    staff=conn.execute("""
-
-    SELECT *
-
-    FROM staff
-
-    WHERE status='Approved'
-
-    """).fetchall()
+    staff = conn.execute(
+        "SELECT * FROM staff WHERE status='Approved'"
+    ).fetchall()
 
     conn.close()
+    return render_template("assign_staff.html", staff=staff)
 
-    return render_template("assign_staff.html",staff=staff)
+
 #staff_dashboard
 @app.route("/staff_dashboard")
 def staff_dashboard():
