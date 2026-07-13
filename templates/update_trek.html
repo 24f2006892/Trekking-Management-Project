@@ -2,40 +2,17 @@
 {% block content %}
 
 <h1>Update Trek</h1>
-
 <form method="POST">
+    <input type="text" name="name" value="{{ trek['name'] }}" placeholder="Trek Name"> <br><br>
+    <input type="text" name="location"  value="{{ trek['location'] }}"  placeholder="Location">  <br><br>
+    <input type="number" name="price" value="{{ trek['price'] }}"  placeholder="Price"> <br><br>
+    <input type="number" name="slots" value="{{ trek['slots'] }}" placeholder="Slots"> <br><br>
+    <input type="date" name="start_date" value="{{ trek['start_date'] }}" placeholder="Start Date"> <br><br>
+    <input type="date" name="end_date" value="{{ trek['end_date']}}" placeholder="End date"> <br><br>
+    <input type="number" name="duration" value="{{ trek['duration']}}" placeholder="Duration"> <br><br>
+    <input type="text" name="description" value="{{ trek['description']}}" placeholder="description"> <br> <br>
 
-    <input type="text"
-           name="name"
-           value="{{ trek['name'] }}"
-           placeholder="Trek Name">
-
-    <br><br>
-
-    <input type="text"
-           name="location"
-           value="{{ trek['location'] }}"
-           placeholder="Location">
-
-    <br><br>
-
-    <input type="number"
-           name="price"
-           value="{{ trek['price'] }}"
-           placeholder="Price">
-
-    <br><br>
-
-    <input type="number"
-           name="slots"
-           value="{{ trek['slots'] }}"
-           placeholder="Slots">
-
-    <br><br>
-
-    <button type="submit" class="btn">
-        Update Trek
-    </button>
+    <button type="submit" class="btn"> Update Trek </button>
 
 </form>
 

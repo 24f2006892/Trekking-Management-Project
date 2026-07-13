@@ -20,6 +20,9 @@
     <th>Location</th>
     <th>Price</th>
     <th>Slots</th>
+    <th>Start Date</th>
+    <th>days</th>
+    <th>Description</th>
     <th>Action</th>
 </tr>
 
@@ -30,19 +33,21 @@
 <td>{{trek["location"]}}</td>
 <td>{{trek["price"]}}</td>
 <td>{{trek["slots"]}}</td>
+<td>{{trek["start_date"]}}</td>
+<td>{{trek["duration"]}}</td>
+<td>{{trek["description"]}}</td>
 <td>
+    <div style="display:flex; flex-direction:column; gap:8px; align-items:center;">
 
-<a href="/update_trek/{{trek['id']}}" class="sbtn">Update</a>
-|
-<form
-action="/delete_trek/{{trek['id']}}"
-method="POST"
-style="display:inline;">
-<button class="sbtn">Delete</button>
+        <a href="/update_trek/{{ trek['id'] }}" class="sbtn">Update</a>
 
-</form>
-|
-<a href="/assign_staff/{{trek['id']}}" class="sbtn">Assign Staff</a>
+        <form action="/delete_trek/{{ trek['id'] }}" method="POST">
+            <button type="submit" class="sbtn">Delete</button>
+        </form>
+
+        <a href="/assign_staff/{{ trek['id'] }}" class="sbtn" style="width: 70%;">Assign Staff</a>
+
+    </div>
 </td>
 </tr>
 {% endfor %}

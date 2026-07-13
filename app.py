@@ -160,6 +160,7 @@ def login():
                 return redirect("/login")
 
             print("Redirecting to Staff Dashboard")
+            
             return redirect("/staff_dashboard")
 
         # Normal User
@@ -209,6 +210,11 @@ def view_treks():
     search = request.args.get("search", "")
     difficulty = request.args.get("difficulty", "")
     location = request.args.get("location", "")
+    start_date = request.args.get("start_date","")
+    date_date = request.args.get("end_date","")
+    discription = request.args.get("description","")
+    
+    
     query = """
         SELECT *
         FROM treks
@@ -270,6 +276,7 @@ def delete_trek(trek_id):
     conn.execute("DELETE FROM treks WHERE id = ?",(trek_id,))
     conn.commit()
     conn.close()
+    flash("Trek Deleted Succesfully")
     return redirect("/view_treks")
 #Update treks 
 @app.route("/update_trek/<int:trek_id>", methods=["GET", "POST"])
@@ -292,12 +299,16 @@ def update_trek(trek_id):
         location = request.form["location"]
         price = request.form["price"]
         slots = request.form["slots"]
+        start_date = request.form["start_date"]
+        end_date = request.form["end_date"]
+        duration = request.form["duration"]
+        description = request.form["description"]
 
         conn.execute("""
             UPDATE treks
-            SET name = ?, location = ?, price = ?, slots = ?
+            SET name = ?, location = ?, price = ?, slots = ?, start_date = ?, end_date = ?, duration = ?, description = ? 
             WHERE id = ?
-        """, (name, location, price, slots, trek_id))
+        """, (name, location, price, slots, start_date, end_date, duration, description, trek_id))
 
         conn.commit()
         conn.close()
@@ -392,17 +403,8 @@ def manage_treks():
         return redirect("/login")
 
     conn=get_db_connnection()
-
-    treks=conn.execute("""
-
-    SELECT *
-
-    FROM treks
-
-    """).fetchall()
-
+    treks=conn.execute(""" SELECT * FROM treks """).fetchall()
     conn.close()
-
     return render_template("manage_treks.html",treks=treks)
 
 @app.route("/approve_staff/<int:id>")
@@ -423,7 +425,7 @@ def approve_staff(id):
     conn.commit()
 
     conn.close()
-
+    flash("Staff Approved Successfully")
     return redirect("/admin_dashboard")
 
 @app.route("/blacklist_staff/<int:id>")
@@ -444,7 +446,7 @@ def blacklist_staff(id):
     conn.commit()
 
     conn.close()
-
+    flash("staff blacklisted successfully")
     return redirect("/admin_dashboard")
 
 @app.route("/assign_staff/<int:trek_id>", methods=["GET", "POST"])
@@ -475,6 +477,7 @@ def assign_staff(trek_id):
         )
         conn.commit()
         conn.close()
+        flash("Staff Assigned successfully")
         return redirect("/admin_dashboard")
 
     staff = conn.execute(
@@ -482,6 +485,7 @@ def assign_staff(trek_id):
     ).fetchall()
 
     conn.close()
+    flash("Staff assigned successfully.")
     return render_template("assign_staff.html", staff=staff)
 
 

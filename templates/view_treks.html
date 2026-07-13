@@ -1,12 +1,11 @@
 {% extends "base.html" %}
+
 {% block content %}
 
 <h1 style="text-align:center;">Available Treks</h1>
 
 <form method="GET" action="/view_treks" class="search-form">
-
     <input type="text" name="search" placeholder="Search Trek">
-
     <select name="difficulty">
         <option value="">All Difficulty</option>
         <option value="Easy">Easy</option>
@@ -16,12 +15,9 @@
 
     <input type="text" name="location" placeholder="Location">
 
-    <button type="submit" class="sbtn">
-        Search
-    </button>
+    <button type="submit" class="sbtn"> Search </button>
 
 </form>
-
 {% for trek in treks %}
 
 <div class="trek-card">
@@ -30,22 +26,17 @@
     <p><b>Location:</b> {{ trek["location"] }}</p>
     <p><b>Price:</b> ₹{{ trek["price"] }}</p>
     <p><b>Available Slots:</b> {{ trek["slots"] }}</p>
+    <p><b>Start Date:</b> {{ trek["start_date"] }}</p>
+    <p><b>End date:</b> {{ trek["end_date"] }}</p>
+    <p><b>Description:</b> {{ trek["description"] }}</p>
+
     <form action="/book/{{ trek['id'] }}" method="POST">
-
         {% if trek["slots"] > 0 %}
-
-            <button type="submit" class="sbtn">
-                Book Trek
-            </button>
-
+            <button type="submit" class="sbtn">  Book Trek </button>
         {% else %}
-
             <p style="color:red;"><b>Full</b></p>
-
         {% endif %}
-
     </form>
-
 </div>
 
 {% endfor %}
