@@ -3,15 +3,20 @@
 
 <h1>Manage Treks</h1>
 
-<form method="GET" action="/manage_treks">
-    <input type="text"
-           name="search"
-           placeholder="Search by Trek Name or Location"
-           value="{{ request.args.get('search','') }}">
 
-    <button type="submit" class="sbtn">Search</button>
+<form method="GET" style="margin-bottom:20px;">
+    <input
+        type="text"
+        name="search"
+        placeholder="Search by Trek Name or ID"
+        value="{{ request.args.get('search','') }}"
+    >
+    <button type="submit" class="sbtn"> Search </button>
+    <a href="/manage_treks">
+    <button type="button" class="sbtn"> Clear </button>
+    </a>
 </form>
-
+<a href="/admin_dashboard"><button type="button" class="sbtn" style="margin-top: 20px;">Back</button></a>
 <br>
 <table border="1">
 <tr>
@@ -52,4 +57,5 @@
 </tr>
 {% endfor %}
 </table>
+
 {% endblock %}

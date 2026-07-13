@@ -10,6 +10,7 @@
     <th>Price</th>
     <th>Booking Date</th>
     <th>Status</th>
+    <th>Action</th>
 </tr>
 {% for booking in bookings %}
 <tr>
@@ -18,8 +19,20 @@
     <td>₹{{ booking["price"] }}</td>
     <td>{{ booking["booking_date"] }}</td>
     <td>{{ booking["status"] }}</td>
+    <td>
+
+    {% if booking["status"] == "Booked" %}
+    <a href="/cancel_booking/{{ booking['id'] }}">
+        <button type="button" class="sbtn">Cancel</button>
+    </a>
+    
+    {% else %}
+    -
+    {% endif %}
+
+</td>
 </tr>
 {% endfor %}
 </table>
-
+<a href="/view_treks" class="sbtn">Back</a>
 {% endblock %}

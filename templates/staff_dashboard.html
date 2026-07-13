@@ -6,6 +6,24 @@
 </head>
 
 <body>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for message in messages %}
+            <div style="
+                width:80%;
+                margin:15px auto;
+                padding:12px;
+                background:#d4edda;
+                color:#155724;
+                border:1px solid #c3e6cb;
+                border-radius:5px;
+                text-align:center;
+                font-weight:bold;">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
 <h1 style="text-align: center;">Staff Dashboard</h1>
 <h3>Welcome {{ staff["name"] }}</h3> <br>
 <p style="font-size: 15px;">Status : {{ staff["status"] }}</p> <br>
@@ -39,6 +57,9 @@
 <a href="/staff_bookings" class="sbtn" >View My Bookings</a><br><br>
 <a href="/update_slots" class="sbtn"> Update Available Slots </a><br><br>
 <a href="/update_trek_status" class="sbtn"> Update Trek Status </a><br><br>
+<a href="/edit_profile">
+    <button type="button" class="btn">Edit Profile</button>
+</a>
 <a href="/logout" class="sbtn" style="background-color: red;">Logout</a>
 </div>
 

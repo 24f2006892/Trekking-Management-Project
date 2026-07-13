@@ -15,6 +15,7 @@
     <th>Trek</th>
     <th>Booking Date</th>
     <th>Status</th>
+    <th>Action</th>
 </tr>
 
 {% for b in bookings %}
@@ -24,6 +25,21 @@
 <td>{{ b["name"] }}</td>
 <td>{{ b["booking_date"] }}</td>
 <td>{{ b["status"] }}</td>
+<td>
+
+{% if b["status"] == "Booked" %}
+<a href="/complete_booking/{{ b['id'] }}">
+    <button type="button" class="sbtn">
+        Complete
+    </button>
+</a>
+
+{% else %}
+{{ b["status"] }}
+
+{% endif %}
+
+</td>
 </tr>
 
 {% endfor %}

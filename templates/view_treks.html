@@ -9,15 +9,15 @@
     <select name="difficulty">
         <option value="">All Difficulty</option>
         <option value="Easy">Easy</option>
-        <option value="Moderate">Moderate</option>
+        <option value="Medium">Medium</option>
         <option value="Hard">Hard</option>
     </select>
-
     <input type="text" name="location" placeholder="Location">
-
     <button type="submit" class="sbtn"> Search </button>
-
 </form>
+<a href="/edit_profile">
+    <button type="button" class="sbtn">Edit Profile</button>
+</a>
 {% for trek in treks %}
 
 <div class="trek-card">
@@ -30,6 +30,7 @@
     <p><b>End date:</b> {{ trek["end_date"] }}</p>
     <p><b>Description:</b> {{ trek["description"] }}</p>
 
+
     <form action="/book/{{ trek['id'] }}" method="POST">
         {% if trek["slots"] > 0 %}
             <button type="submit" class="sbtn">  Book Trek </button>
@@ -37,8 +38,13 @@
             <p style="color:red;"><b>Full</b></p>
         {% endif %}
     </form>
-</div>
 
+    <div class="trek-image">
+    {% if trek["image"] %}
+        <img src="{{ url_for('static', filename='images/' + trek['image']) }}" alt="{{ trek['name'] }}">
+    {% endif %}
+</div>
+</div>
 {% endfor %}
 
 {% endblock %}

@@ -1,0 +1,33 @@
+{% extends "admin_base.html" %}
+
+{% block content %}
+
+<h1>Manage Bookings</h1>
+<a href="/admin_dashboard"><button type="button" class="sbtn" style="margin-top: 20px;">Back</button></a>
+
+<table>
+<tr>
+    <th>Booking ID</th>
+    <th>User</th>
+    <th>Trek</th>
+    <th>Location</th>
+    <th>Booking Date</th>
+    <th>Status</th>
+</tr>
+
+{% for booking in bookings %}
+
+<tr>
+    <td>{{ booking["id"] }}</td>
+    <td>{{ booking["username"] }}</td>
+    <td>{{ booking["name"] }}</td>
+    <td>{{ booking["location"] }}</td>
+    <td>{{ booking["booking_date"] }}</td>
+    <td>{{ booking["status"] }}</td>
+</tr>
+
+{% endfor %}
+
+</table>
+
+{% endblock %}

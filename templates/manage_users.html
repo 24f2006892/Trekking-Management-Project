@@ -1,18 +1,24 @@
 {% extends "admin_base.html" %}
 
 {% block content %}
+<h1>Manage Users</h1>
 <form method="GET">
 <input type="text" name="search" placeholder="Search User">
 <button class="sbtn"> Search </button>
+<a href="/manage_users">
+    <button type="button" class="sbtn"> Clear </button>
+    </a>
 
 </form>
-<h1>Manage Users</h1>
+<a href="/admin_dashboard"><button type="button" class="sbtn" style="margin-top: 20px;">Back</button></a>
+
 <table border="1">
 <tr>
     <th>ID</th>
     <th>Username</th>
     <th>Email</th>
     <th>Role</th>
+    <th>Action</th>
 </tr>
 
 {% for user in users %}
@@ -23,10 +29,20 @@
 <td>{{ user["username"] }}</td>
 <td>{{ user["email"] }}</td>
 <td>{{ user["role"] }}</td>
+<td>
+    {% if user["role"] != "admin" and user["role"] != "blacklisted" %}
+        <a href="/blacklist_user/{{ user['id'] }}">
+            <button type="button" class="sbtn">Blacklist</button>
+        </a>
+    {% else %}
+        {{ user["role"] }}
+    {% endif %}
+</td>
 </tr>
 
 {% endfor %}
 
 </table>
+
 
 {% endblock %}

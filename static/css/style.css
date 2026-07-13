@@ -215,6 +215,9 @@ footer{
 }
 
 .trek-card{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
     background:white;
     border:1px solid #ddd;
     border-radius:8px;
@@ -222,6 +225,24 @@ footer{
     margin:20px 0;
     box-shadow:0 2px 8px rgba(0,0,0,.1);
 }
+
+.trek-details{
+    width:65%;
+}
+
+.trek-image{
+    width:30%;
+    text-align:right;
+}
+
+.trek-image img{
+    width:100%;
+    max-width:300px;
+    height:200px;
+    object-fit:cover;
+    border-radius:8px;
+}
+
 
 .trek-card h2{
     color:#2563eb;

@@ -10,10 +10,12 @@
         type="text"
         name="search"
         placeholder="Search by ID or Name">
-
     <button type="submit" class="sbtn">
         Search
     </button>
+    <a href="/manage_staff">
+    <button type="button" class="sbtn"> Clear </button>
+    </a>
 
 </form>
 
@@ -33,27 +35,14 @@
 {% for s in staff %}
 
 <tr>
-
     <td>{{ s["id"] }}</td>
-
     <td>{{ s["name"] }}</td>
-
     <td>{{ s["mobile"] }}</td>
-
     <td>{{ s["status"] }}</td>
-
     <td>{{ s["assigned_trek"] }}</td>
-
     <td>
-
-        <a href="/approve_staff/{{ s['id'] }}" class="btn btn-success">
-            Approve
-        </a>
-
-        <a href="/blacklist_staff/{{ s['id'] }}" class="btn btn-danger">
-            Blacklist
-        </a>
-
+        <a href="/approve_staff/{{ s['id'] }}" class="btn btn-success">Approve</a>
+        <a href="/blacklist_staff/{{ s['id'] }}" class="btn btn-danger">Blacklist</a>
     </td>
 
 </tr>
@@ -61,5 +50,6 @@
 {% endfor %}
 
 </table>
+<a href="/admin_dashboard"><button type="button" class="sbtn" style="margin-top: 20px;">Back</button></a>
 
 {% endblock %}

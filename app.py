@@ -71,6 +71,18 @@ def init_db():
     flash("Database Initialized Successfully")
     return redirect("/")
     
+@app.route("/add_image_column")
+def add_image_column():
+    conn = get_db_connnection()
+
+    try:
+        conn.execute("ALTER TABLE treks ADD COLUMN image TEXT")
+        conn.commit()
+        return "Image column added successfully."
+    except Exception as e:
+        return str(e)
+    finally:
+        conn.close()
 @app.route('/')
 def home():
     return render_template("home.html")
@@ -84,6 +96,7 @@ def my_bookings():
     conn = get_db_connnection()
     bookings = conn.execute("""
     SELECT
+        bookings.id,
         treks.name,
         treks.location,
         treks.price,
@@ -96,8 +109,64 @@ def my_bookings():
 """, (username,)).fetchall()
     conn.close()
     return render_template("my_bookings.html", bookings=bookings)
+@app.route("/cancel_booking/<int:booking_id>")
+def cancel_booking(booking_id):
 
+    if "user" not in session:
+        return redirect("/login")
 
+    conn = get_db_connnection()
+
+    booking = conn.execute("""
+        SELECT *
+        FROM bookings
+        WHERE id = ? AND username = ?
+    """, (booking_id, session["user"])).fetchone()
+
+    if not booking:
+        conn.close()
+        flash("Booking not found.")
+        return redirect("/my_bookings")
+
+    # Update booking status
+    conn.execute("""
+        UPDATE bookings
+        SET status = 'Cancelled'
+        WHERE id = ?
+    """, (booking_id,))
+
+    # Increase trek slot
+    conn.execute("""
+        UPDATE treks
+        SET slots = slots + 1
+        WHERE id = ?
+    """, (booking["trek_id"],))
+
+    conn.commit()
+    conn.close()
+
+    flash("Booking cancelled successfully.")
+    return redirect("/my_bookings")
+
+@app.route("/complete_booking/<int:booking_id>")
+def complete_booking(booking_id):
+
+    if "user" not in session or session["role"] != "staff":
+        return redirect("/login")
+
+    conn = get_db_connnection()
+
+    conn.execute("""
+        UPDATE bookings
+        SET status='Completed'
+        WHERE id=?
+    """, (booking_id,))
+
+    conn.commit()
+    conn.close()
+
+    flash("Booking marked as Completed.")
+    return redirect("/staff_bookings")
 # Login
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -116,6 +185,14 @@ def login():
             (username,)
         ).fetchone()
         conn.close()
+        
+        if not user:
+            flash("User not found.")
+            return redirect("/login")
+
+        if user["role"] == "blacklisted":
+            flash("Your account has been blacklisted by the Admin.")
+            return redirect("/login")
 
         if not user:
             flash("User not found.")
@@ -248,12 +325,31 @@ def book_trek(trek_id):
     #check trek
     trek = conn.execute(""" 
                         SELECT * FROM treks WHERE  id=?   """,(trek_id,)).fetchone()
+    if not trek:
+        conn.close()
+        flash("Trek not found.")
+        return redirect("/view_treks")
+
+    if trek["status"] != "Open":
+        conn.close()
+        flash("This trek is not open for booking.")
+        return redirect("/view_treks")
+    
     if not trek or trek["slots"]<=0:
         conn.close()
-        return "No treks Available"
-    # insert bookings
+        flash("No slots available")
+        return redirect("/view_treks")
+
     # Get logged-in user
     user = conn.execute("SELECT * FROM users WHERE username = ?",(username,)).fetchone()
+
+    existing = conn.execute("""
+                        SELECT * FROM bookings WHERE user_id = ? AND trek_id = ? AND status = 'Booked'""", (user["id"], trek_id)).fetchone()
+    
+    if existing:
+        conn.close()
+        flash("You have already booked this trek.")
+        return redirect("/my_bookings")
 
     # Insert booking
     conn.execute("""
@@ -303,12 +399,13 @@ def update_trek(trek_id):
         end_date = request.form["end_date"]
         duration = request.form["duration"]
         description = request.form["description"]
+        image = request.form["image"]
 
         conn.execute("""
             UPDATE treks
-            SET name = ?, location = ?, price = ?, slots = ?, start_date = ?, end_date = ?, duration = ?, description = ? 
+            SET name = ?, location = ?, price = ?, slots = ?, start_date = ?, end_date = ?, duration = ?, description = ?, image = ? 
             WHERE id = ?
-        """, (name, location, price, slots, start_date, end_date, duration, description, trek_id))
+        """, (name, location, price, slots, start_date, end_date, duration, description, image, trek_id))
 
         conn.commit()
         conn.close()
@@ -321,7 +418,8 @@ def update_trek(trek_id):
 
 @app.route("/logout")
 def logout():
-    session.pop("user",None)
+    session.clear()
+    flash("Logged out successfully.")
     return redirect("/login")
 
 @app.route("/contact")
@@ -368,7 +466,7 @@ def manage_users():
                              SELECT * FROM users WHERE username LIKE ? OR id LIKE ?""",("%"+search+"%","%"+search+"%")).fetchall()
 
     else:
-        users = conn.execute(""" SELECT *FROM users""").fetchall()
+        users = conn.execute(""" SELECT *FROM users where role = "user" """).fetchall()
     conn.close()
     return render_template("manage_users.html", users=users)
 
@@ -399,14 +497,20 @@ def manage_staff():
 @app.route("/manage_treks")
 def manage_treks():
 
-    if "user" not in session or session["user"]!="admin":
+    if "user" not in session or session["user"] != "admin":
         return redirect("/login")
+    conn = get_db_connnection()
+    search = request.args.get("search", "")
+    if search:
+        treks = conn.execute(""" SELECT * FROM treks WHERE name LIKE ? OR CAST(id AS TEXT) LIKE ?
+        """, ("%" + search + "%", "%" + search + "%")).fetchall()
+    else:
+        treks = conn.execute("""  SELECT * FROM treks
+        """).fetchall()
 
-    conn=get_db_connnection()
-    treks=conn.execute(""" SELECT * FROM treks """).fetchall()
     conn.close()
-    return render_template("manage_treks.html",treks=treks)
 
+    return render_template("manage_treks.html", treks=treks)
 @app.route("/approve_staff/<int:id>")
 def approve_staff(id):
 
@@ -613,6 +717,7 @@ def staff_bookings():
 
         bookings = conn.execute("""
             SELECT
+                bookings.id,
                 bookings.username,
                 bookings.booking_date,
                 bookings.status,
@@ -651,9 +756,11 @@ def trek():
         start_date = request.form["start_date"]
         end_date = request.form["end_date"]
         description = request.form["description"]
+        image = request.form["image"]
         conn.execute("""
-            INSERT INTO treks (name, location, price, slots, difficulty, duration, assigned_staffID, start_date, end_date, description)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",(name, location, price, slots, difficulty, duration, assigned_staffID, start_date, end_date, description
+            INSERT INTO treks (name, location, price, slots, difficulty, duration, assigned_staffID, start_date, end_date, description, image)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",(name, location, price, slots, difficulty, duration, assigned_staffID, start_date,
+                                                       end_date, description, image 
         ))
 
         conn.commit()
@@ -665,12 +772,94 @@ def trek():
     conn.close()
     return render_template("trek.html", staff=staff)
 
+@app.route("/manage_bookings")
+def manage_bookings():
 
+    if "user" not in session or session["user"] != "admin":
+        return redirect("/login")
 
-    
+    conn = get_db_connnection()
 
+    bookings = conn.execute("""
+        SELECT
+            bookings.id,
+            bookings.username,
+            treks.name,
+            treks.location,
+            bookings.booking_date,
+            bookings.status
+        FROM bookings
+        JOIN treks
+        ON bookings.trek_id = treks.id
+    """).fetchall()
 
+    conn.close()
 
+    return render_template("manage_bookings.html", bookings=bookings)
+
+@app.route("/blacklist_user/<int:id>")
+def blacklist_user(id):
+    if "user" not in session or session["user"] != "admin":
+        return redirect("/login")
+    conn = get_db_connnection()
+    conn.execute("""
+        UPDATE users
+        SET role = 'blacklisted'
+        WHERE id = ?
+    """, (id,))
+
+    conn.commit()
+    conn.close()
+
+    flash("User blacklisted successfully.")
+    return redirect("/manage_users")
+
+@app.route("/edit_profile", methods=["GET", "POST"])
+def edit_profile():
+
+    if "user" not in session:
+        return redirect("/login")
+
+    conn = get_db_connnection()
+
+    user = conn.execute(
+        "SELECT * FROM users WHERE username=?",
+        (session["user"],)
+    ).fetchone()
+
+    if request.method == "POST":
+
+        username = request.form["username"]
+        email = request.form["email"]
+        mobile = request.form["mobile"]
+
+        conn.execute("""
+            UPDATE users
+            SET username=?, email=?, mobile=?
+            WHERE id=?
+        """, (username, email, mobile, user["id"]))
+        if session["role"] == "staff":
+            conn.execute(""" UPDATE staff SET name = ?, mobile = ? WHERE mobile = ?
+                        """, (username, mobile, user["mobile"]))
+
+        conn.commit()
+        conn.close()
+
+        session["user"] = username
+        session["mobile"] = mobile
+
+        flash("Profile updated successfully.")
+
+        if session["role"] == "admin":
+            return redirect("/admin_dashboard")
+        elif session["role"] == "staff":
+            return redirect("/staff_dashboard")
+        else:
+            return redirect("/view_treks")
+
+    conn.close()
+
+    return render_template("edit_profile.html", user=user)
 
 if __name__ == '__main__' :
     app.run(debug=True)

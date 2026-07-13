@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Edit Profile</h2>
+
+<form method="POST">
+
+    <label>Username</label><br>
+    <input type="text" name="username" value="{{ user['username'] }}" required><br><br>
+
+    <label>Email</label><br>
+    <input type="email" name="email" value="{{ user['email'] }}" required><br><br>
+
+    <label>Mobile</label><br>
+    <input type="text" name="mobile" value="{{ user['mobile'] }}" required><br><br>
+
+    <button type="submit" class="sbtn">Update Profile</button>
+    <br><br>
+
+    {% if session["role"] == "staff" %}
+    <a href="/staff_dashboard">
+        <button type="button" class="sbtn">Back</button>
+    </a>
+
+    {% elif session["role"] == "admin" %}
+    <a href="/admin_dashboard">
+        <button type="button" class="sbtn">Back</button>
+    </a>
+
+    {% else %}
+    <a href="/view_treks">
+        <button type="button" class="sbtn">Back</button>
+    </a>
+    {% endif %}
+
+</form>
+
+{% endblock %}
