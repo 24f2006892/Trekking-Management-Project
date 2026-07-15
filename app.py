@@ -11,7 +11,8 @@ def get_db_connnection():
     conn = sqlite3.connect("database.db")
     conn.row_factory =sqlite3.Row
     return conn
-# Initializing Database
+
+
 @app.route("/init_db")
 def init_db():
     conn = get_db_connnection()
@@ -833,14 +834,27 @@ def edit_profile():
         email = request.form["email"]
         mobile = request.form["mobile"]
 
+        old_username = user["username"]
+
         conn.execute("""
             UPDATE users
             SET username=?, email=?, mobile=?
             WHERE id=?
         """, (username, email, mobile, user["id"]))
+
+        
+        conn.execute("""
+            UPDATE bookings
+            SET username=?
+            WHERE username=?
+        """, (username, old_username))
+
         if session["role"] == "staff":
-            conn.execute(""" UPDATE staff SET name = ?, mobile = ? WHERE mobile = ?
-                        """, (username, mobile, user["mobile"]))
+            conn.execute("""
+                UPDATE staff
+                SET name = ?, mobile = ?
+                WHERE mobile = ?
+            """, (username, mobile, user["mobile"]))
 
         conn.commit()
         conn.close()
